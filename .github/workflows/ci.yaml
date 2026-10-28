@@ -1,8 +1,6 @@
 # Actions for checking tests in the project (Taken from Lab 8 Code of CMPUT301)
 name: Checking Tests
 on:
-  push:
-    branches: [main, master, "**"]
   pull_request:
     branches: [main, master]
 
