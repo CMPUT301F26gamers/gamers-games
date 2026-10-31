@@ -2,7 +2,6 @@ package com.example.campsiteapp
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
@@ -19,8 +18,11 @@ class LotteryTest {
                 .toInstant()
         )
 
+    // registration 1 Jun - 9 Jun, lottery 10 Jun - 20 Jun
     private val lottery = Lottery(
-        campsiteId = "camp1",
+        campsiteIds = mutableListOf("camp1"),
+        registrationStart = date(1, 6, 2026),
+        registrationEnd = date(9, 6, 2026),
         lotteryStart = date(10, 6, 2026),
         lotteryEnd = date(20, 6, 2026)
     )
@@ -70,14 +72,14 @@ class LotteryTest {
     }
 
     @Test
-    fun setRegistrationPeriod_invalid_leavesDatesNull() {
+    fun setRegistrationPeriod_invalid_leavesDatesUnchanged() {
         try {
             lottery.setRegistrationPeriod(date(8, 6, 2026), date(2, 6, 2026))
         } catch (e: IllegalArgumentException) {
             // expected
         }
-        assertNull(lottery.registrationStart)
-        assertNull(lottery.registrationEnd)
+        assertEquals(date(1, 6, 2026), lottery.registrationStart)
+        assertEquals(date(9, 6, 2026), lottery.registrationEnd)
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -90,16 +92,21 @@ class LotteryTest {
         lottery.setRegistrationPeriod(date(5, 6, 2026), date(21, 6, 2026))
     }
 
-    @Test
-    fun setRegistrationPeriod_sameDatesAsLottery_isAccepted() {
+    @Test(expected = IllegalArgumentException::class)
+    fun setRegistrationPeriod_endsAfterLotteryStarts_throws() {
         lottery.setRegistrationPeriod(date(10, 6, 2026), date(20, 6, 2026))
-        assertEquals(date(10, 6, 2026), lottery.registrationStart)
+    }
+
+    @Test
+    fun setRegistrationPeriod_endsExactlyWhenLotteryStarts_isAccepted() {
+        lottery.setRegistrationPeriod(date(5, 6, 2026), date(10, 6, 2026))
+        assertEquals(date(10, 6, 2026), lottery.registrationEnd)
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun setLotteryPeriod_registrationWouldStartAfterLottery_throws() {
         lottery.setRegistrationPeriod(date(2, 6, 2026), date(8, 6, 2026))
-        lottery.setLotteryPeriod(date(1, 6, 2026), date(20, 6, 2026))  // lottery now starts before registration
+        lottery.setLotteryPeriod(date(1, 6, 2026), date(20, 6, 2026))  // lottery now starts before registration ends
     }
 
     @Test
@@ -145,16 +152,17 @@ class LotteryTest {
     // isActive
 
     @Test
-    fun isActive_noRegistrationPeriod_usesLotteryDates() {
-        assertTrue(lottery.isActive(date(15, 6, 2026)))
-        assertFalse(lottery.isActive(date(5, 6, 2026)))
-        assertFalse(lottery.isActive(date(25, 6, 2026)))
+    fun isActive_onlyDuringRegistration() {
+        assertTrue(lottery.isActive(date(5, 6, 2026)))     // inside registration
+        assertFalse(lottery.isActive(date(31, 5, 2026)))   // before registration
+        assertFalse(lottery.isActive(date(15, 6, 2026)))   // lottery running, registration closed
+        assertFalse(lottery.isActive(date(25, 6, 2026)))   // after everything
     }
 
     @Test
     fun isActive_boundariesAreInclusive() {
-        assertTrue(lottery.isActive(date(10, 6, 2026)))
-        assertTrue(lottery.isActive(date(20, 6, 2026)))
+        assertTrue(lottery.isActive(date(1, 6, 2026)))
+        assertTrue(lottery.isActive(date(9, 6, 2026)))
     }
 
     @Test
@@ -164,13 +172,6 @@ class LotteryTest {
         assertTrue(lottery.isActive(date(5, 6, 2026)))
         // inside the lottery, after registration closed
         assertFalse(lottery.isActive(date(15, 6, 2026)))
-    }
-
-    @Test
-    fun isActive_onlyOneRegistrationDateSet_fallsBackToLotteryDates() {
-        lottery.registrationStart = date(2, 6, 2026)   // end left null
-        assertFalse(lottery.isActive(date(5, 6, 2026)))
-        assertTrue(lottery.isActive(date(15, 6, 2026)))
     }
 
     // hasEntrant / join
@@ -201,5 +202,40 @@ class LotteryTest {
         assertTrue(lottery.hasEntrant("user1"))
         assertTrue(lottery.hasEntrant("user2"))
         assertEquals(2, lottery.entrants.size)
+    }
+
+    // hasCampsite / addCampsite
+
+    @Test
+    fun hasCampsite_listedCampsite_isTrue() {
+        assertTrue(lottery.hasCampsite("camp1"))
+    }
+
+    @Test
+    fun hasCampsite_unknownCampsite_isFalse() {
+        assertFalse(lottery.hasCampsite("camp2"))
+    }
+
+    @Test
+    fun addCampsite_newCampsite_returnsTrueAndAddsIt() {
+        assertTrue(lottery.addCampsite("camp2"))
+        assertTrue(lottery.hasCampsite("camp2"))
+        assertEquals(2, lottery.campsiteIds.size)
+    }
+
+    @Test
+    fun addCampsite_sameCampsiteTwice_returnsFalseAndDoesNotDuplicate() {
+        assertFalse(lottery.addCampsite("camp1"))
+        assertEquals(1, lottery.campsiteIds.size)
+    }
+
+    @Test
+    fun addCampsite_multipleCampsites_allAdded() {
+        lottery.addCampsite("camp2")
+        lottery.addCampsite("camp3")
+        assertTrue(lottery.hasCampsite("camp1"))
+        assertTrue(lottery.hasCampsite("camp2"))
+        assertTrue(lottery.hasCampsite("camp3"))
+        assertEquals(3, lottery.campsiteIds.size)
     }
 }
