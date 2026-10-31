@@ -1,6 +1,7 @@
 package com.example.campsiteapp
 
 import java.util.Date
+import kotlin.random.Random
 
 /**
  * A lottery for one or more campsites.
@@ -19,13 +20,15 @@ import java.util.Date
  * @property entrants IDs of the users who have joined this lottery
  */
 class Lottery(
+    val id: String = "",
     val campsiteIds: MutableList<String> = mutableListOf(),
     var lotteryStart: Date = Date(),
     var lotteryEnd: Date = Date(),
     var registrationStart: Date = Date(),   // US 02.04.03
     var registrationEnd: Date = Date(),
     var numWinners: Int = 1,                // US 02.04.05
-    val entrants: MutableList<String> = mutableListOf()
+    val entrants: MutableList<String> = mutableListOf(),
+    val winners: MutableList<String> = mutableListOf()
 ) {
     /**
      * Sets the period the campsites are listed in the lottery (US 02.04.01)
@@ -33,7 +36,10 @@ class Lottery(
      * @param start date of the lottery
      * @param end date of the lottery
      */
-    fun setLotteryPeriod(start: Date, end: Date) {
+    fun setLotteryPeriod(start: Date, end: Date, now: Date = Date()) {
+        if (start.before(now)) {
+            throw IllegalArgumentException("Start date cannot be in the past")
+        }
         if (!start.before(end)) {
             throw IllegalArgumentException("Start date must be before end date")
         }
@@ -50,7 +56,11 @@ class Lottery(
      * @param start date of the registration period
      * @param end date of the registration period
      */
-    fun setRegistrationPeriod(start: Date, end: Date) {
+
+    fun setRegistrationPeriod(start: Date, end: Date, now: Date = Date()) {
+        if (start.before(now)) {
+            throw IllegalArgumentException("Start date cannot be in the past")
+        }
         if (!start.before(end)) {
             throw IllegalArgumentException("Start date must be before end date")
         }
@@ -69,7 +79,13 @@ class Lottery(
      * @param start start of the lottery period
      * @param end end of the lottery period
      */
-    fun setPeriods(regStart: Date, regEnd: Date, start: Date, end: Date) {
+    fun setPeriods(
+        regStart: Date, regEnd: Date, start: Date, end: Date,
+        now: Date = Date()
+    ) {
+        if (regStart.before(now) || start.before(now)) {
+            throw IllegalArgumentException("Start date cannot be in the past")
+        }
         if (!regStart.before(regEnd) || !start.before(end)) {
             throw IllegalArgumentException("Start date must be before end date")
         }
@@ -149,5 +165,25 @@ class Lottery(
         }
         campsiteIds.add(campsiteId)
         return true
+    }
+
+    /** @return true if winners have already been drawn */
+    fun hasDrawn(): Boolean {
+        return winners.isNotEmpty()
+    }
+
+    /**
+     * Randomly picks [numWinners] winners from the entrants.
+     * If there are fewer entrants than [numWinners], everyone wins.
+     * Can only be done once, after registration has closed
+     */
+    fun drawWinners(now: Date = Date(), random: Random = Random.Default) {
+        if (!now.after(registrationEnd)) {
+            throw IllegalStateException("Registration has not closed yet")
+        }
+        if (hasDrawn()) {
+            throw IllegalStateException("Winners have already been drawn")
+        }
+        winners.addAll(entrants.shuffled(random).take(numWinners))
     }
 }
