@@ -63,7 +63,9 @@ class LotteryList(
 
         for (userId in campsite.waitlist.toList()) {
             lottery.join(userId)
-            campsite.leaveWaitlist(userId)
+            if (lottery.hasEntrant(userId)) {
+                campsite.leaveWaitlist(userId)
+            }
         }
         return true
     }
@@ -108,4 +110,36 @@ class LotteryList(
         return lotteries.firstOrNull { it.id == lotteryId }
     }
 
+    /**
+     * Handles the joining in a campsite
+     * @param campsite the campsite whose details screen is open
+     * @param userId the user pressing the button
+     * @param now the time to check registration against
+     * @return what happened, so the caller can choose the message to show
+     */
+    fun enter(campsite: Campsite, userId: String, now: Date): EntryResult {
+        val lottery = getActiveLottery(campsite.id, now)
+        if (lottery != null) {
+            val joined = lottery.join(userId)
+            if (lottery.hasEntrant(userId)) campsite.leaveWaitlist(userId)
+            return if (joined) EntryResult.JOINED_LOTTERY
+            else EntryResult.ALREADY_IN_LOTTERY
+        }
+        if (campsite.isInWaitlist(userId)) return EntryResult.ALREADY_ON_WAITLIST
+        if (campsite.waitlistIsFull()) return EntryResult.WAITLIST_FULL
+        campsite.joinWaitlist(userId)
+        return EntryResult.JOINED_WAITLIST
+    }
+}
+
+/**
+ * The outcome of an entrant pressing the join button on a campsite's details
+ * screen (US 01.01.06, US 01.02.01).
+ */
+enum class EntryResult {
+    JOINED_LOTTERY,
+    ALREADY_IN_LOTTERY,
+    JOINED_WAITLIST,
+    ALREADY_ON_WAITLIST,
+    WAITLIST_FULL
 }
