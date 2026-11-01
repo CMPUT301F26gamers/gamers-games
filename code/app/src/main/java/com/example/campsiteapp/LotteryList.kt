@@ -36,7 +36,8 @@ class LotteryList(
     fun createLottery(
         campsiteIds: List<String>,
         regStart: Date, regEnd: Date,
-        start: Date, end: Date
+        start: Date, end: Date,
+        numWinners: Int = 1
     ): Lottery {
         if (campsiteIds.isEmpty()) {
             throw IllegalArgumentException("Select at least one campsite")
@@ -49,6 +50,7 @@ class LotteryList(
             campsiteIds = campsiteIds.toMutableList()
         )
         lottery.setPeriods(regStart, regEnd, start, end)
+        lottery.updateNumWinners(numWinners)
         lotteries.add(lottery)
         return lottery
     }
