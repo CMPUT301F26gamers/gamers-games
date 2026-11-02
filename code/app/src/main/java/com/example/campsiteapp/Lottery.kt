@@ -141,7 +141,14 @@ class Lottery(
      */
     fun updateNumWinners(n: Int) {
         if (n < 1) {
-            throw IllegalArgumentException("Winners must be a whole number of 1 or more")
+            throw IllegalArgumentException(
+                "Winners must be a whole number of 1 or more"
+            )
+        }
+        if (waitlistCapacity != null && n > waitlistCapacity!!) {
+            throw IllegalArgumentException(
+                "Number of winners cannot exceed waitlist capacity"
+            )
         }
         numWinners = n
     }
@@ -153,8 +160,21 @@ class Lottery(
      */
     fun updateWaitlistCapacity(capacity: Int?) {
         if (capacity != null && capacity < 1) {
-            throw IllegalArgumentException("Capacity must be a whole number of 1 or more")
+            throw IllegalArgumentException(
+                "Capacity must be a whole number of 1 or more"
+            )
         }
+        if (capacity != null && capacity < waitlist.size) {
+            throw IllegalArgumentException(
+                "Capacity cannot be lower than the current number of entrants"
+            )
+        }
+        if (capacity != null && capacity < numWinners) {
+            throw IllegalArgumentException(
+                "Capacity cannot be lower than the number of winners"
+            )
+        }
+
         waitlistCapacity = capacity
     }
 
