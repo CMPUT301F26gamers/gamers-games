@@ -27,7 +27,7 @@ enum class Roles {
  * @property profilePictureUrl The user's profile picture as a string
  * @property enableNotifications Whether the user wants to receive notifications
  */
-class Profile (val uid: String, var name: String = "", var email: String = "",
+class Profile (private val uid: String, var name: String = "", var email: String = "",
                var phoneNumber: String = "", var profilePictureUrl: String = "",
                var enableNotifications: Boolean = true) {
 
@@ -47,7 +47,7 @@ class Profile (val uid: String, var name: String = "", var email: String = "",
      * @param profilePictureUrl The user's profile picture as a string or NULL
      */
     fun updateProfileInformation(name: String? = null, email: String? = null,
-                                 phoneNumber: String? = null, profilePictureUrl: String? = null){
+                                 phoneNumber: String? = null, profilePictureUrl: String? = null, enableNotifications: Boolean? = null){
         if (name != null) {
             this.name = name
         }
@@ -59,6 +59,9 @@ class Profile (val uid: String, var name: String = "", var email: String = "",
         }
         if (profilePictureUrl != null) {
             this.profilePictureUrl = profilePictureUrl
+        }
+        if (enableNotifications != null) {
+            this.enableNotifications = enableNotifications
         }
     }
 
