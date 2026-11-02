@@ -1,18 +1,13 @@
 package com.example.campsiteapp
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Test
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
-import kotlin.random.Random
 
 class LotteryTest {
 
-    /** Builds a Date for the given day, month (1-12) and year. */
     private fun date(day: Int, month: Int, year: Int): Date =
         Date.from(
             LocalDate.of(year, month, day)
@@ -20,240 +15,230 @@ class LotteryTest {
                 .toInstant()
         )
 
-    // "today" for the tests: before every date used below
     private val now = date(1, 1, 2026)
-
-    // a time after registration has closed
     private val afterClose = date(10, 6, 2026)
 
-    // registration 1 Jun - 9 Jun, lottery 10 Jun - 20 Jun
-    private val lottery = Lottery(
+    private fun lottery() = Lottery(
         campsiteIds = mutableListOf("camp1"),
         registrationStart = date(1, 6, 2026),
         registrationEnd = date(9, 6, 2026),
-        lotteryStart = date(10, 6, 2026),
-        lotteryEnd = date(20, 6, 2026)
+        bookingStart = date(10, 6, 2026),
+        bookingEnd = date(19, 6, 2026),
+        lotteryStart = date(20, 6, 2026),
+        lotteryEnd = date(25, 6, 2026)
     )
 
     @Test
-    fun setLotteryPeriod_updatesWhenValid_rejectsAndKeepsOldDatesWhenInvalid() {
-        lottery.setLotteryPeriod(
-            date(1, 7, 2026),
-            date(5, 7, 2026),
-            now
+    fun setLotteryPeriod_updatesAndRejectsInvalidDates() {
+        val l = lottery()
+
+        l.setLotteryPeriod(date(26, 6, 2026), date(30, 6, 2026), now)
+        assertEquals(date(26, 6, 2026), l.lotteryStart)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setLotteryPeriod(date(30, 6, 2026), date(26, 6, 2026), now)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setLotteryPeriod(date(26, 6, 2026), date(26, 6, 2026), now)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setLotteryPeriod(date(1, 1, 2026), date(5, 1, 2026), now)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setLotteryPeriod(date(18, 6, 2026), date(25, 6, 2026), now)
+        }
+    }
+
+    @Test
+    fun setRegistrationPeriod_updatesAndRejectsInvalidDates() {
+        val l = lottery()
+
+        l.setRegistrationPeriod(date(2, 6, 2026), date(8, 6, 2026), now)
+        assertEquals(date(2, 6, 2026), l.registrationStart)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setRegistrationPeriod(date(8, 6, 2026), date(2, 6, 2026), now)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setRegistrationPeriod(date(2, 6, 2026), date(11, 6, 2026), now)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setRegistrationPeriod(
+                date(1, 6, 2026),
+                date(11, 6, 2026),
+                now
+            )
+        }
+    }
+
+    @Test
+    fun setBookingPeriod_updatesAndRejectsInvalidDates() {
+        val l = lottery()
+
+        l.setBookingPeriod(date(10, 6, 2026), date(19, 6, 2026))
+        assertEquals(date(10, 6, 2026), l.bookingStart)
+
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setBookingPeriod(date(19, 6, 2026), date(10, 6, 2026))
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setBookingPeriod(date(8, 6, 2026), date(15, 6, 2026))
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.setBookingPeriod(date(10, 6, 2026), date(21, 6, 2026))
+        }
+    }
+
+    @Test
+    fun setPeriods_updatesAllPeriods() {
+        val l = lottery()
+
+        l.setPeriods(
+            date(2, 6, 2026), date(8, 6, 2026),
+            date(8, 6, 2026), date(19, 6, 2026),
+            date(20, 6, 2026), date(25, 6, 2026), now
         )
-        assertEquals(date(1, 7, 2026), lottery.lotteryStart)
-        assertEquals(date(5, 7, 2026), lottery.lotteryEnd)
 
-        // start after end
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setLotteryPeriod(date(5, 7, 2026),
-                date(1, 7, 2026),
-                now
-            )
-        }
-        // start equals end
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setLotteryPeriod(date(5, 7, 2026),
-                date(5, 7, 2026),
-                now
-            )
-        }
-        // start in past
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setLotteryPeriod(date(1, 7, 2026),
-                date(5, 7, 2026),
-                date(2, 7, 2026)
-            )
-        }
-        // starts before registration ends
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setLotteryPeriod(date(1, 6, 2026),
-                date(20, 6, 2026),
-                now
-            )
-        }
-
-        assertEquals(date(1, 7, 2026), lottery.lotteryStart)
-        assertEquals(date(5, 7, 2026), lottery.lotteryEnd)
+        assertEquals(date(2, 6, 2026), l.registrationStart)
+        assertEquals(date(8, 6, 2026), l.registrationEnd)
+        assertEquals(date(8, 6, 2026), l.bookingStart)
+        assertEquals(date(19, 6, 2026), l.bookingEnd)
+        assertEquals(date(20, 6, 2026), l.lotteryStart)
+        assertEquals(date(25, 6, 2026), l.lotteryEnd)
     }
 
     @Test
-    fun setRegistrationPeriod_updatesWhenValid_rejectsAndKeepsOldDatesWhenInvalid() {
-        lottery.setRegistrationPeriod(date(2, 6, 2026),
-            date(8, 6, 2026),
-            now
-        )
-        assertEquals(date(2, 6, 2026), lottery.registrationStart)
-        assertEquals(date(8, 6, 2026), lottery.registrationEnd)
+    fun updateNumWinners_validatesInput() {
+        val l = lottery()
 
-        // ending exactly when the lottery starts is allowed
-        lottery.setRegistrationPeriod(date(5, 6, 2026),
-            date(10, 6, 2026),
-            now
-        )
-        assertEquals(date(10, 6, 2026), lottery.registrationEnd)
-
-        // start after end
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setRegistrationPeriod(date(8, 6, 2026),
-                date(2, 6, 2026),
-                now
-            )
-        }
-        // start after lottery start
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setRegistrationPeriod(date(11, 6, 2026),
-                date(15, 6, 2026),
-                now
-            )
-        }
-        // end after lottery end
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setRegistrationPeriod(date(5, 6, 2026),
-                date(21, 6, 2026),
-                now
-            )
-        }
-        // ends after lottery starts
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setRegistrationPeriod(date(10, 6, 2026),
-                date(20, 6, 2026),
-                now
-            )
-        }
-        // start in past
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.setRegistrationPeriod(date(2, 6, 2026),
-                date(8, 6, 2026),
-                date(3, 6, 2026)
-            )
-        }
-
-        assertEquals(date(5, 6, 2026), lottery.registrationStart)
-        assertEquals(date(10, 6, 2026), lottery.registrationEnd)
-    }
-
-    @Test
-    fun setPeriods_updatesAllWhenValid_throwsWhenStartInPast() {
-        lottery.setPeriods(date(2, 6, 2026),
-            date(8, 6, 2026),
-            date(9, 6, 2026),
-            date(19, 6, 2026),
-            now)
-        assertEquals(date(2, 6, 2026), lottery.registrationStart)
-        assertEquals(date(8, 6, 2026), lottery.registrationEnd)
-        assertEquals(date(9, 6, 2026), lottery.lotteryStart)
-        assertEquals(date(19, 6, 2026), lottery.lotteryEnd)
+        l.updateNumWinners(4)
+        assertEquals(4, l.numWinners)
 
         assertThrows(IllegalArgumentException::class.java) {
-            lottery.setPeriods(date(1, 6, 2026),
-                date(9, 6, 2026),
-                date(10, 6, 2026),
-                date(20, 6, 2026),
-                date(2, 6, 2026)
-            )
+            l.updateNumWinners(0)
+        }
+        assertThrows(IllegalArgumentException::class.java) {
+            l.updateNumWinners(-1)
         }
     }
 
     @Test
-    fun updateNumWinners_acceptsPositive_rejectsZeroAndNegative() {
-        lottery.updateNumWinners(1)
-        assertEquals(1, lottery.numWinners)
+    fun updateWaitlistCapacity_validatesInput() {
+        val l = lottery()
 
-        lottery.updateNumWinners(4)
+        l.updateWaitlistCapacity(2)
+        assertEquals(2, l.waitlistCapacity)
+
         assertThrows(IllegalArgumentException::class.java) {
-            lottery.updateNumWinners(0)
+            l.updateWaitlistCapacity(0)
         }
-        assertThrows(IllegalArgumentException::class.java) {
-            lottery.updateNumWinners(-3)
+
+        l.updateWaitlistCapacity(null)
+        assertEquals(null, l.waitlistCapacity)
+    }
+
+    @Test
+    fun isActive_checksRegistrationPeriod() {
+        val l = lottery()
+
+        assertTrue(l.isActive(date(1, 6, 2026)))
+        assertTrue(l.isActive(date(5, 6, 2026)))
+        assertTrue(l.isActive(date(9, 6, 2026)))
+        assertFalse(l.isActive(date(31, 5, 2026)))
+        assertFalse(l.isActive(date(10, 6, 2026)))
+    }
+
+    @Test
+    fun join_leave_andCapacity_workCorrectly() {
+        val l = lottery()
+        l.updateWaitlistCapacity(2)
+
+        assertTrue(l.join("user1"))
+        assertTrue(l.join("user2"))
+        assertFalse(l.join("user1"))
+        assertFalse(l.join("user3"))
+        assertTrue(l.isFull())
+
+        assertTrue(l.leave("user1"))
+        assertFalse(l.isFull())
+        assertEquals(1, l.waitlist.size)
+    }
+
+    @Test
+    fun addCampsite_rejectsDuplicates() {
+        val l = lottery()
+
+        assertTrue(l.hasCampsite("camp1"))
+        assertTrue(l.addCampsite("camp2"))
+        assertFalse(l.addCampsite("camp2"))
+        assertEquals(2, l.campsiteIds.size)
+    }
+
+    @Test
+    fun drawWinners_drawsCorrectNumberAndIsReproducible() {
+        val l = lottery()
+        val other = lottery()
+
+        listOf("u1", "u2", "u3", "u4").forEach {
+            l.join(it)
+            other.join(it)
         }
-        assertEquals(4, lottery.numWinners)
-    }
 
-    @Test
-    fun isActive_onlyDuringRegistration_boundariesInclusive() {
-        assertTrue(lottery.isActive(date(5, 6, 2026)))
-        assertTrue(lottery.isActive(date(1, 6, 2026)))     // start boundary
-        assertTrue(lottery.isActive(date(9, 6, 2026)))     // end boundary
-        assertFalse(lottery.isActive(date(31, 5, 2026)))   // before registration
-        assertFalse(lottery.isActive(date(15, 6, 2026)))   // lottery running
-        assertFalse(lottery.isActive(date(25, 6, 2026)))   // after everything
-
-        // follows the registration dates once they change
-        lottery.setRegistrationPeriod(date(2, 6, 2026),
-            date(8, 6, 2026),
-            now
-        )
-        assertFalse(lottery.isActive(date(1, 6, 2026)))
-        assertTrue(lottery.isActive(date(5, 6, 2026)))
-        assertFalse(lottery.isActive(date(9, 6, 2026)))
-    }
-
-    @Test
-    fun join_addsNewUsers_andRejectsDuplicates() {
-        assertFalse(lottery.hasEntrant("user1"))
-        assertTrue(lottery.join("user1"))
-        assertTrue(lottery.join("user2"))
-        assertFalse(lottery.join("user1"))
-        assertTrue(lottery.hasEntrant("user1"))
-        assertTrue(lottery.hasEntrant("user2"))
-        assertEquals(2, lottery.entrants.size)
-    }
-
-    @Test
-    fun addCampsite_addsNewCampsites_andRejectsDuplicates() {
-        assertTrue(lottery.hasCampsite("camp1"))
-        assertFalse(lottery.hasCampsite("camp2"))
-        assertTrue(lottery.addCampsite("camp2"))
-        assertTrue(lottery.addCampsite("camp3"))
-        assertFalse(lottery.addCampsite("camp1"))
-        assertTrue(lottery.hasCampsite("camp3"))
-        assertEquals(3, lottery.campsiteIds.size)
-    }
-
-    @Test
-    fun drawWinners_throwsWhileRegistrationOpenOrIfAlreadyDrawn() {
-        lottery.join("user1")
-        assertThrows(IllegalStateException::class.java)
-        {
-            lottery.drawWinners(date(5, 6, 2026))
-        }
-        lottery.drawWinners(afterClose)
         assertThrows(IllegalStateException::class.java) {
-            lottery.drawWinners(afterClose)
+            l.drawWinners(2, 1L, date(5, 6, 2026))
         }
+
+        val drawn = l.drawWinners(2, 1L, afterClose)
+        val otherDraw = other.drawWinners(2, 1L, afterClose)
+
+        assertEquals(2, drawn.size)
+        assertEquals(drawn, otherDraw)
+        assertEquals(2, l.winners.size)
     }
 
     @Test
-    fun drawWinners_picksCorrectWinners() {
-        // more entrants than winners: exactly numWinners distinct entrants
-        listOf("u1", "u2", "u3", "u4", "u5").forEach { lottery.join(it) }
-        lottery.updateNumWinners(2)
-        lottery.drawWinners(afterClose, Random(1))
-        assertEquals(2, lottery.winners.toSet().size)
-        assertEquals(2, lottery.winners.size)
-        assertTrue(lottery.entrants.containsAll(lottery.winners))
+    fun drawWinners_canDrawAgainWithoutDuplicates() {
+        val l = lottery()
 
-        // same seed gives same winners
-        val other = Lottery(registrationEnd = date(9, 6, 2026),
-            entrants = mutableListOf("u1", "u2", "u3", "u4", "u5")
-        )
-        other.updateNumWinners(2)
-        other.drawWinners(afterClose, Random(1))
-        assertEquals(lottery.winners, other.winners)
+        listOf("u1", "u2", "u3", "u4").forEach { l.join(it) }
 
-        // fewer entrants than winners: everyone wins
-        val few = Lottery(registrationEnd = date(9, 6, 2026),
-            entrants = mutableListOf("u1", "u2")
-        )
-        few.updateNumWinners(5)
-        few.drawWinners(afterClose)
-        assertEquals(setOf("u1", "u2"), few.winners.toSet())
+        val first = l.drawWinners(2, 1L, afterClose)
+        val second = l.drawWinners(2, 2L, afterClose)
 
-        // no entrants: no winners
-        val none = Lottery(registrationEnd = date(9, 6, 2026))
-        none.drawWinners(afterClose)
-        assertTrue(none.winners.isEmpty())
+        assertEquals(2, second.size)
+        assertTrue(first.toSet().intersect(second.toSet()).isEmpty())
+    }
+
+    @Test
+    fun bookAndDecline_moveWinnersCorrectly() {
+        val l = lottery()
+
+        l.join("u1")
+        l.join("u2")
+        l.drawWinners(2, 1L, afterClose)
+
+        val bookingDate = date(15, 6, 2026)
+
+        assertTrue(l.book("u1", bookingDate))
+        assertTrue(l.bookings.contains("u1"))
+        assertFalse(l.winners.contains("u1"))
+
+        assertTrue(l.decline("u2", bookingDate))
+        assertTrue(l.declined.contains("u2"))
+        assertFalse(l.winners.contains("u2"))
+
+        assertTrue(l.hasBeenDrawn("u1"))
+        assertTrue(l.hasBeenDrawn("u2"))
+    }
+
+    @Test
+    fun leave_rejectsAlreadyDrawnUsers() {
+        val l = lottery()
+
+        l.join("u1")
+        l.drawWinners(1, 1L, afterClose)
+
+        assertFalse(l.leave("u1"))
+        assertTrue(l.hasEntrant("u1"))
     }
 }

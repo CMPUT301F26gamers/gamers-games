@@ -7,10 +7,8 @@ import java.util.UUID
  * A campsite can be in several lotteries
  * idk if this is the correct assumption tho
  *
- * Owners create a lottery with [createLottery]
- *
- * [registerWaitlisted] signs up everyone waiting on the lottery's campsites.
- * also something that needs to be checked?
+ * Owners create a lottery with [createLottery]. Entrants join and leave a
+ * campsite's waitlist (the active lottery's entrants) with [enter] and [leave].
  *
  * @property lotteries every lottery currently listed
  */
@@ -22,7 +20,7 @@ class LotteryList(
         return lotteries.filter { it.hasCampsite(campsiteId) }
     }
 
-    /** return a campsite's lottery that is open in a certain period */
+    /** return a campsite's lottery that is open for registration at [now] */
     fun getActiveLottery(campsiteId: String, now: Date): Lottery? {
         for (lottery in lotteries) {
             if (lottery.hasCampsite(campsiteId) && lottery.isActive(now)) {
@@ -36,8 +34,10 @@ class LotteryList(
     fun createLottery(
         campsiteIds: List<String>,
         regStart: Date, regEnd: Date,
+        bookStart: Date, bookEnd: Date,
         start: Date, end: Date,
-        numWinners: Int = 1
+        numWinners: Int = 1,
+        waitlistCapacity: Int? = null
     ): Lottery {
         if (campsiteIds.isEmpty()) {
             throw IllegalArgumentException("Select at least one campsite")
@@ -49,27 +49,11 @@ class LotteryList(
             id = UUID.randomUUID().toString(),
             campsiteIds = campsiteIds.toMutableList()
         )
-        lottery.setPeriods(regStart, regEnd, start, end)
+        lottery.setPeriods(regStart, regEnd, bookStart, bookEnd, start, end)
         lottery.updateNumWinners(numWinners)
+        lottery.updateWaitlistCapacity(waitlistCapacity)
         lotteries.add(lottery)
         return lottery
-    }
-
-    /**
-     * Moves everyone on the campsite's waitlist into the campsite's open lottery,
-     * then empties the waitlist
-     * nothing calls this yet
-     */
-    fun registerWaitlisted(campsite: Campsite, now: Date): Boolean {
-        val lottery = getActiveLottery(campsite.id, now) ?: return false
-
-        for (userId in campsite.waitlist.toList()) {
-            lottery.join(userId)
-            if (lottery.hasEntrant(userId)) {
-                campsite.leaveWaitlist(userId)
-            }
-        }
-        return true
     }
 
     /**
@@ -95,7 +79,6 @@ class LotteryList(
         return lotteries.remove(lottery)
     }
 
-
     // 2 Getter functions, delete if not needed
     /** Every lottery in the list. */
     fun allLotteries(): List<Lottery> {
@@ -113,24 +96,25 @@ class LotteryList(
     }
 
     /**
-     * Handles the joining in a campsite
      * @param campsite the campsite whose details screen is open
      * @param userId the user pressing the button
      * @param now the time to check registration against
      * @return what happened, so the caller can choose the message to show
      */
     fun enter(campsite: Campsite, userId: String, now: Date): EntryResult {
-        val lottery = getActiveLottery(campsite.id, now)
-        if (lottery != null) {
-            val joined = lottery.join(userId)
-            if (lottery.hasEntrant(userId)) campsite.leaveWaitlist(userId)
-            return if (joined) EntryResult.JOINED_LOTTERY
-            else EntryResult.ALREADY_IN_LOTTERY
-        }
-        if (campsite.isInWaitlist(userId)) return EntryResult.ALREADY_ON_WAITLIST
-        if (campsite.waitlistIsFull()) return EntryResult.WAITLIST_FULL
-        campsite.joinWaitlist(userId)
+        val lottery = getActiveLottery(campsite.id, now) ?: return EntryResult.NOT_OPEN
+        if (lottery.hasEntrant(userId)) return EntryResult.ALREADY_ON_WAITLIST
+        if (lottery.isFull()) return EntryResult.WAITLIST_FULL
+        lottery.join(userId)
         return EntryResult.JOINED_WAITLIST
+    }
+
+    /**
+     * @return true if the user was on the campsite's active waitlist and left it
+     */
+    fun leave(campsite: Campsite, userId: String, now: Date): Boolean {
+        val lottery = getActiveLottery(campsite.id, now) ?: return false
+        return lottery.leave(userId)
     }
 }
 
@@ -139,9 +123,8 @@ class LotteryList(
  * screen (US 01.01.06, US 01.02.01).
  */
 enum class EntryResult {
-    JOINED_LOTTERY,
-    ALREADY_IN_LOTTERY,
     JOINED_WAITLIST,
     ALREADY_ON_WAITLIST,
-    WAITLIST_FULL
+    WAITLIST_FULL,
+    NOT_OPEN
 }
