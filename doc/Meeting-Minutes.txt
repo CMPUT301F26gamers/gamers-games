@@ -1,1 +1,25 @@
-This is our meeting minutes
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Date: 2/11/26 | 10:00PM
+
+Melody - Setup firebase for the group project. Reviewed 3 PRs. Attempt finishing at least 2 user stories before Wednesday.
+
+Sahib -  Completed 1 User story, created code for screen, developed the unit tests and created the PR. reviewed Jag’s PR. I’ll do 1 - 2 more stories before Wednesday’s lab.
+
+Jagdeep - Created profile class and tests. Before Wednesday, refine the profile and add admin functionalities. 
+
+Mujtaba - Planned to develop code for campsite details and implement user stories. Attempt finishing at least layout of the user story screen. 
+
+Duy - Implemented the lottery system. Finished up the models for the lottery system. Merged 2 PRs. Work on the lottery user stories.
+
+Tu - Planned out user stories.
+
+
+Discussion:
+  Could have a meeting on Thursday night to finalize submission. 
+  Could enable firebase constraints for security purposes. 
+
+
+Group Action Items:
+  Confirm with TA security features. 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
