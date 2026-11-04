@@ -106,7 +106,7 @@ fun ProfileRow(
         }
 
         Button(
-            modifier = Modifier.testTag("removeProfileButton_${profile.email}"),
+            modifier = Modifier.testTag("removeProfileButton_${profile.uid}"),
             onClick = { showDialog = true },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Red

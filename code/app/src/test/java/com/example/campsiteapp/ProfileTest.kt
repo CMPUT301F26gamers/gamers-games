@@ -115,7 +115,7 @@ class ProfileTest {
         assertTrue(profile.hasRole(Roles.ENTRANT))
         assertFalse(profile.hasRole(Roles.OWNER))
         assertFalse(profile.hasRole(Roles.ADMIN))
-        profile.addCampsiteOwnerRole()
+        profile.addRole(Roles.OWNER)
         assertTrue(profile.hasRole(Roles.ENTRANT))
         assertTrue(profile.hasRole(Roles.OWNER))
         assertFalse(profile.hasRole(Roles.ADMIN))

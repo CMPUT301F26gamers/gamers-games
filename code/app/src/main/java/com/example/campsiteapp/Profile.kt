@@ -27,7 +27,7 @@ enum class Roles {
  * @property profilePictureUrl The user's profile picture as a string
  * @property enableNotifications Whether the user wants to receive notifications
  */
-class Profile (private val uid: String, var name: String = "", var email: String = "",
+class Profile (val uid: String, var name: String = "", var email: String = "",
                var phoneNumber: String = "", var profilePictureUrl: String = "",
                var enableNotifications: Boolean = true) {
 
@@ -78,8 +78,8 @@ class Profile (private val uid: String, var name: String = "", var email: String
     /**
      * Adds a campsite owner role to the user
      */
-    fun addCampsiteOwnerRole(){
-        roles.add(Roles.OWNER)
+    fun addRole(role: Roles){
+        roles.add(role)
     }
 
 }

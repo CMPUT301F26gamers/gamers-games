@@ -13,11 +13,27 @@ class ProfileRepository {
         get() = _profiles.toList()
 
     fun addProfile(profile: Profile) {
-        profilesRef.document(profile.name).set(profile)
+        profilesRef.document(profile.uid).set(profile)
     }
 
     fun removeProfile(profile: Profile) {
-        profilesRef.document(profile.name).delete()
+        profilesRef.document(profile.uid).delete()
+    }
+
+    fun createOrLoadProfile(uid: String, onSuccessfulLoad: (Profile) -> Unit) {
+        profilesRef.document(uid).get().addOnSuccessListener { document ->
+            val exisingProfile = document.toObject(Profile::class.java)
+
+            if (exisingProfile != null) {
+                _profiles.add(exisingProfile)
+                onSuccessfulLoad(exisingProfile)
+            } else {
+                val newProfile = Profile(uid)
+                addProfile(newProfile)
+                _profiles.add(newProfile)
+                onSuccessfulLoad(newProfile)
+            }
+        }
     }
 
     init {
