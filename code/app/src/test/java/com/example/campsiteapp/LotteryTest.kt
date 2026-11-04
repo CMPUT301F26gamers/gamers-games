@@ -149,17 +149,21 @@ class LotteryTest {
     }
 
     @Test
-    fun join_leave_andCapacity_workCorrectly() {
+    fun canJoinAndCanLeave_andCapacity_workCorrectly() {
         val l = lottery()
         l.updateWaitlistCapacity(2)
 
-        assertTrue(l.join("user1"))
-        assertTrue(l.join("user2"))
-        assertFalse(l.join("user1"))
-        assertFalse(l.join("user3"))
+        assertTrue(l.canJoin("user1"))
+        l.waitlist.add("user1")
+        assertTrue(l.canJoin("user2"))
+        l.waitlist.add("user2")
+
+        assertFalse(l.canJoin("user1"))
+        assertFalse(l.canJoin("user3"))
         assertTrue(l.isFull())
 
-        assertTrue(l.leave("user1"))
+        assertTrue(l.canLeave("user1"))
+        l.waitlist.remove("user1")
         assertFalse(l.isFull())
         assertEquals(1, l.waitlist.size)
     }
@@ -180,8 +184,8 @@ class LotteryTest {
         val other = lottery()
 
         listOf("u1", "u2", "u3", "u4").forEach {
-            l.join(it)
-            other.join(it)
+            l.waitlist.add(it)
+            other.waitlist.add(it)
         }
 
         assertThrows(IllegalStateException::class.java) {
@@ -200,7 +204,7 @@ class LotteryTest {
     fun drawWinners_canDrawAgainWithoutDuplicates() {
         val l = lottery()
 
-        listOf("u1", "u2", "u3", "u4").forEach { l.join(it) }
+        listOf("u1", "u2", "u3", "u4").forEach { l.waitlist.add(it) }
 
         val first = l.drawWinners(2, 1L, afterClose)
         val second = l.drawWinners(2, 2L, afterClose)
@@ -213,8 +217,8 @@ class LotteryTest {
     fun bookAndDecline_moveWinnersCorrectly() {
         val l = lottery()
 
-        l.join("u1")
-        l.join("u2")
+        l.waitlist.add("u1")
+        l.waitlist.add("u2")
         l.drawWinners(2, 1L, afterClose)
 
         val bookingDate = date(15, 6, 2026)
@@ -232,13 +236,13 @@ class LotteryTest {
     }
 
     @Test
-    fun leave_rejectsAlreadyDrawnUsers() {
+    fun canLeave_rejectsAlreadyDrawnUsers() {
         val l = lottery()
 
-        l.join("u1")
+        l.waitlist.add("u1")
         l.drawWinners(1, 1L, afterClose)
 
-        assertFalse(l.leave("u1"))
+        assertFalse(l.canLeave("u1"))
         assertTrue(l.hasEntrant("u1"))
     }
 }

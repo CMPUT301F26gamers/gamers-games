@@ -202,36 +202,14 @@ class Lottery(
         return waitlist.contains(userId)
     }
 
-    /**
-     * Adds a user to the waitlist (US 01.01.06, US 01.02.01)
-     *
-     * !!!!WARNING!!!!
-     * This does not check [isActive]
-     * the caller decides whether joining is allowed
-     *
-     * @param userId the user joining
-     * @return true if the user was added, false if already in or the waitlist is full
-     */
-    fun join(userId: String): Boolean {
-        if (hasEntrant(userId) || isFull()) {
-            return false
-        }
-        waitlist.add(userId)
-        return true
+    /** @return true if this user may join the waitlist (not already on it, and it isn't full) */
+    fun canJoin(userId: String): Boolean {
+        return !hasEntrant(userId) && !isFull()
     }
 
-    /**
-     * Removes a user from the waitlist (US 01.02.02).
-     * Not possible for users who were already drawn (winners, bookings, declined).
-     *
-     * @param userId the user leaving
-     * @return true if the user was on the waitlist and has been removed
-     */
-    fun leave(userId: String): Boolean {
-        if (hasBeenDrawn(userId)) {
-            return false
-        }
-        return waitlist.remove(userId)
+    /** @return true if this user may leave the waitlist (on it, and not already drawn) */
+    fun canLeave(userId: String): Boolean {
+        return hasEntrant(userId) && !hasBeenDrawn(userId)
     }
 
     /**

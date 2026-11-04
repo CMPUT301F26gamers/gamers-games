@@ -127,7 +127,7 @@ class LotteryRepositoryTest {
     @Test
     fun joinStateOnWaitlistAndFull() {
         val l = addLottery("l1", listOf("camp1"), capacity = 1)
-        l.join("u1")
+        l.waitlist.add("u1")
         assertEquals(JoinState.ON_WAITLIST,
             repo.joinState(campsite("camp1"),
                 "u1",
@@ -152,7 +152,7 @@ class LotteryRepositoryTest {
     @Test
     fun enterRefusedWhenNotOpenOrFull() {
         val l = addLottery("l1", listOf("camp1"), capacity = 1)
-        l.join("u1")
+        l.waitlist.add("u1")
         var result: Boolean? = null
         repo.enter(campsite("camp1"), "u2", inReg) { result = it }   // full
         assertEquals(false, result)
@@ -173,7 +173,7 @@ class LotteryRepositoryTest {
     @Test
     fun leaveWritesToFirestoreWhenOnWaitlist() {
         val l = addLottery("l1", listOf("camp1"))
-        l.join("u1")
+        l.waitlist.add("u1")
         repo.leave(campsite("camp1"), "u1", inReg)
         verify { ref.document("l1") }
     }

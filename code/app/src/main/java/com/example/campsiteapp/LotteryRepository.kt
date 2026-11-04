@@ -110,12 +110,6 @@ class LotteryRepository (
             .addOnFailureListener { onDone(false) }
     }
 
-    // 2 Getter functions, delete if not needed
-    /** Every lottery in the list. */
-    fun allLotteries(): List<Lottery> {
-        return lotteries.toList()
-    }
-
     /** Every lottery whose registration is open right now. */
     fun allActiveLotteries(now: Date): List<Lottery> {
         return lotteries.filter { it.isActive(now) }
@@ -128,24 +122,22 @@ class LotteryRepository (
 
     fun enter(campsite: Campsite, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
         val lottery = getActiveLottery(campsite.id, now)
-        if (lottery == null || lottery.hasEntrant(userId) || lottery.isFull()) {
+        if (lottery == null || !lottery.canJoin(userId)) {
             onDone(false)
             return
         }
         ref.document(lottery.id)
-            //arrayUnion prevent error when 2 users join at the same time
             .update("waitlist", FieldValue.arrayUnion(userId))
             .addOnSuccessListener { onDone(true) }
             .addOnFailureListener { onDone(false) }
     }
 
-
     fun joinState(campsite: Campsite, userId: String, now: Date): JoinState {
         val lottery = getActiveLottery(campsite.id, now) ?: return JoinState.NOT_OPEN
         return when {
             lottery.hasEntrant(userId) -> JoinState.ON_WAITLIST
-            lottery.isFull() -> JoinState.WAITLIST_FULL
-            else -> JoinState.CAN_JOIN
+            lottery.canJoin(userId) -> JoinState.CAN_JOIN
+            else -> JoinState.WAITLIST_FULL
         }
     }
 
@@ -154,12 +146,11 @@ class LotteryRepository (
      */
     fun leave(campsite: Campsite, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
         val lottery = getActiveLottery(campsite.id, now)
-        if (lottery == null || lottery.hasBeenDrawn(userId) || !lottery.hasEntrant(userId)) {
+        if (lottery == null || !lottery.canLeave(userId)) {
             onDone(false)
             return
         }
         ref.document(lottery.id)
-            //arrayRemove prevent error when 2 users join at the same time
             .update("waitlist", FieldValue.arrayRemove(userId))
             .addOnSuccessListener { onDone(true) }
             .addOnFailureListener { onDone(false) }
