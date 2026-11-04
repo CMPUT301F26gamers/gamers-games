@@ -29,10 +29,10 @@ class CampsiteRepository {
         get() = _campsites
 
     fun addCampsite(campsite: Campsite) {
-        campsitesRef.document(campsite.name).set(campsite)
+        campsitesRef.document(campsite.id).set(campsite)
     }
 
     fun removeCampsite(campsite: Campsite) {
-        campsitesRef.document(campsite.name).delete()
+        campsitesRef.document(campsite.id).delete()
     }
 }
