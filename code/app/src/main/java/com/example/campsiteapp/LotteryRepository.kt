@@ -32,7 +32,21 @@ class LotteryRepository (
         }
     }
 
-    // validates (throws IllegalArgumentException), then saves
+    /**
+     * Creates a new lottery for one or more campsites and saves it
+     *
+     * The periods must follow this order: registration -> booking -> stay
+     * @param campsiteIds IDs of the campsites to list in the lottery
+     * @param regStart registration start date
+     * @param regEnd end registration date, the draw happens after this
+     * @param bookStart start booking date
+     * @param bookEnd when the booking offer expires
+     * @param start start of camping date (the date range that user can choose)
+     * @param end end of camping date
+     * @param numWinners number of winners
+     * @param waitlistCapacity max size of the waitlist
+     * @param onDone true if the lottery was saved, false if saving failed
+     */
     fun createLottery(
         campsiteIds: List<String>,
         regStart: Date, regEnd: Date,
@@ -59,6 +73,9 @@ class LotteryRepository (
         save(lottery, onDone)
     }
 
+    /**
+     * Save the lottery's state onto firebase
+     */
     private fun save(lottery: Lottery, onDone: (Boolean) -> Unit = {}) {
         ref.document(lottery.id).set(lottery)
             .addOnSuccessListener { onDone(true) }
@@ -82,9 +99,7 @@ class LotteryRepository (
 
     /**
      * Takes a campsite out of one lottery. If that leaves the lottery empty,
-     * the lottery is removed too.
-     *
-     * @return true if the campsite was in that lottery
+     * the lottery is removed too
      */
     fun removeCampsite(lotteryId: String, campsiteId: String, onDone: (Boolean) -> Unit = {}) {
         val lottery = findLottery(lotteryId)
@@ -99,7 +114,9 @@ class LotteryRepository (
         }
     }
 
-    /** Removes a whole lottery. @return true if it was in the list. */
+    /**
+     * Removes a whole lottery
+     */
     fun removeLottery(lotteryId: String, onDone: (Boolean) -> Unit = {}) {
         if (findLottery(lotteryId) == null) {
             onDone(false)
@@ -110,7 +127,9 @@ class LotteryRepository (
             .addOnFailureListener { onDone(false) }
     }
 
-    /** Every lottery whose registration is open right now. */
+    /**
+     *  every lottery whose registration is open right now
+     */
     fun allActiveLotteries(now: Date): List<Lottery> {
         return lotteries.filter { it.isActive(now) }
     }
@@ -120,6 +139,10 @@ class LotteryRepository (
         return lotteries.firstOrNull { it.id == lotteryId }
     }
 
+
+    /**
+     * add user to the lottery if conditions met
+     */
     fun enter(campsite: Campsite, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
         val lottery = getActiveLottery(campsite.id, now)
         if (lottery == null || !lottery.canJoin(userId)) {
@@ -132,6 +155,10 @@ class LotteryRepository (
             .addOnFailureListener { onDone(false) }
     }
 
+
+    /**
+     * returns appropriate states used for entrant's join button
+     */
     fun joinState(campsite: Campsite, userId: String, now: Date): JoinState {
         val lottery = getActiveLottery(campsite.id, now) ?: return JoinState.NOT_OPEN
         return when {
@@ -142,7 +169,7 @@ class LotteryRepository (
     }
 
     /**
-     * @return true if the user was on the campsite's active waitlist and left it
+     * remove user from lottery if conditions met
      */
     fun leave(campsite: Campsite, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
         val lottery = getActiveLottery(campsite.id, now)
@@ -159,7 +186,6 @@ class LotteryRepository (
 
 /**
  * The outcome of an entrant pressing the join button on a campsite's details
- * screen (US 01.01.06, US 01.02.01).
  */
 enum class JoinState {
     CAN_JOIN,

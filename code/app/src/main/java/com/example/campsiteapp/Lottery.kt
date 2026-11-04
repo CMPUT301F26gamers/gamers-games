@@ -7,26 +7,21 @@ import kotlin.random.Random
  * A lottery for one or more campsites.
  * registration (join the waitlist) -> draw -> booking (winners book/decline)
  *
- * The owner configures the class with [setPeriods], [setLotteryPeriod],
- * [setRegistrationPeriod], [setBookingPeriod], [updateNumWinners] and
- * [updateWaitlistCapacity]. Entrants use [join] and [leave]; [isActive],
- * [isFull] and [hasEntrant] are the methods for checking join validity.
- *
  * Order of the periods: registration ends <= booking starts, booking ends <= stay starts.
  *
  * @property campsiteIds IDs of the campsites listed in this lottery
- * @property lotteryStart start of the stay (when people actually camp)
- * @property lotteryEnd end of the stay
- * @property registrationStart start of the registration period (US 02.04.03)
- * @property registrationEnd end of registration; the draw happens after this
- * @property bookingStart when winners are notified and can book (US 02.04.04)
- * @property bookingEnd when the offer expires
- * @property numWinners number of winners for the first draw, always 1 or more
- * @property waitlistCapacity max size of the waitlist, null means no limit
+ * @property lotteryStart start of camping date (the date range that user can choose)
+ * @property lotteryEnd end of camping date
+ * @property registrationStart registration start date
+ * @property registrationEnd end registration date, the draw happens after this
+ * @property bookingStart start booking date
+ * @property bookingEnd when the booking offer expires
+ * @property numWinners number of winners for the first draw
+ * @property waitlistCapacity max size of the waitlist
  * @property waitlist IDs of the users on the waitlist
- * @property winners drawn users who have not yet booked or declined (pending)
+ * @property winners drawn users who have not yet booked or declined
  * @property bookings winners who accepted and booked
- * @property declined winners who declined (kept so they are never drawn again)
+ * @property declined winners who declined
  */
 class Lottery(
     val id: String = "",
@@ -241,10 +236,8 @@ class Lottery(
 
     /**
      * Randomly draws [count] new winners from the waitlist, skipping anyone
-     * already drawn. Unselected users stay on the waitlist, so this can be
-     * called again (e.g. with count 1) when a winner declines.
-     * If fewer users are left than [count], everyone left wins.
-     * Can only be done after registration has closed.
+     * already drawn
+     * If fewer users are left than [count], everyone left wins
      *
      * @param count how many to draw, 1 or more
      * @param seed seed for the random generator (same seed + same waitlist = same draw)
@@ -269,7 +262,7 @@ class Lottery(
     }
 
     /**
-     * A pending winner accepts and books. They move from [winners] to [bookings].
+     * move user from [winners] to [bookings]
      * @return true if recorded, false if booking is closed or the user isn't a pending winner
      */
     fun book(userId: String, now: Date): Boolean {
@@ -279,10 +272,8 @@ class Lottery(
     }
 
     /**
-     * A pending winner declines. They move from [winners] to [declined] and
-     * stay on the waitlist, but won't be drawn again. The controller can then
-     * call [drawWinners] with count 1 to replace them.
-     * @return true if recorded, same conditions as [book]
+     * move user from [winners] to [declined] and
+     * stay on the waitlist, but won't be drawn again
      */
     fun decline(userId: String, now: Date): Boolean {
         if (!isBookingOpen(now) || !winners.remove(userId)) return false
