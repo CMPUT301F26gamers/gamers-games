@@ -43,6 +43,7 @@ fun DashboardScreen(
 
         // Common features
         DashboardButton("Campsites", navController, "")
+        DashboardButton("My Profile", navController, "profile")
 
         // Entrant features
         if (profile?.hasRole(Roles.ENTRANT) == true) {
