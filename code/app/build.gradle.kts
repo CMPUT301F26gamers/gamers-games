@@ -54,5 +54,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
     implementation("com.google.firebase:firebase-firestore")
+    testImplementation("io.mockk:mockk:1.14.7")
     implementation("androidx.navigation:navigation-compose:2.10.2")
 }
