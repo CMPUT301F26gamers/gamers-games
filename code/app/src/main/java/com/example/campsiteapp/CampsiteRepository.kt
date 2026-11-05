@@ -74,4 +74,7 @@ class CampsiteRepository {
         campsitesRef.document(campsite.id).delete()
     }
 
+    fun getCampsitesByOwner(ownerId: String): List<Campsite> {
+        return _campsites.filter { it.ownerId == ownerId }
+    }
 }

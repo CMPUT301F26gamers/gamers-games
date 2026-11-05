@@ -36,6 +36,7 @@ class LotteryRepository (
      * Creates a new lottery for one or more campsites and saves it
      *
      * The periods must follow this order: registration -> booking -> stay
+     * @param ownerId IDs of the lottery creator
      * @param campsiteIds IDs of the campsites to list in the lottery
      * @param regStart registration start date
      * @param regEnd end registration date, the draw happens after this
@@ -48,6 +49,7 @@ class LotteryRepository (
      * @param onDone true if the lottery was saved, false if saving failed
      */
     fun createLottery(
+        ownerId: String,                       // new
         campsiteIds: List<String>,
         regStart: Date, regEnd: Date,
         bookStart: Date, bookEnd: Date,
@@ -56,6 +58,9 @@ class LotteryRepository (
         waitlistCapacity: Int? = null,
         onDone: (Boolean) -> Unit
     ) {
+        if (ownerId.isBlank()) {
+            throw IllegalArgumentException("Lottery needs an owner")
+        }
         if (campsiteIds.isEmpty()) {
             throw IllegalArgumentException("Select at least one campsite")
         }
@@ -64,6 +69,7 @@ class LotteryRepository (
         }
         val lottery = Lottery(
             id = UUID.randomUUID().toString(),
+            ownerId = ownerId,                 // new
             campsiteIds = campsiteIds.toMutableList()
         )
         lottery.setPeriods(regStart, regEnd, bookStart, bookEnd, start, end)
@@ -71,6 +77,11 @@ class LotteryRepository (
         lottery.updateWaitlistCapacity(waitlistCapacity)
 
         save(lottery, onDone)
+    }
+
+    /** @return every lottery this owner created */
+    fun getLotteriesByOwner(ownerId: String): List<Lottery> {
+        return lotteries.filter { it.ownerId == ownerId }
     }
 
     /**
@@ -143,9 +154,8 @@ class LotteryRepository (
     /**
      * add user to the lottery if conditions met
      */
-    fun enter(campsite: Campsite, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
-        val lottery = getActiveLottery(campsite.id, now)
-        if (lottery == null || !lottery.canJoin(userId)) {
+    fun enter(lottery: Lottery, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
+        if (!lottery.isActive(now) || !lottery.canJoin(userId)) {
             onDone(false)
             return
         }
@@ -159,21 +169,18 @@ class LotteryRepository (
     /**
      * returns appropriate states used for entrant's join button
      */
-    fun joinState(campsite: Campsite, userId: String, now: Date): JoinState {
-        val lottery = getActiveLottery(campsite.id, now) ?: return JoinState.NOT_OPEN
-        return when {
-            lottery.hasEntrant(userId) -> JoinState.ON_WAITLIST
-            lottery.canJoin(userId) -> JoinState.CAN_JOIN
-            else -> JoinState.WAITLIST_FULL
-        }
+    fun joinState(lottery: Lottery, userId: String, now: Date): JoinState = when {
+        lottery.hasEntrant(userId) -> JoinState.ON_WAITLIST
+        !lottery.isActive(now)     -> JoinState.NOT_OPEN
+        lottery.isFull()           -> JoinState.WAITLIST_FULL
+        else                       -> JoinState.CAN_JOIN
     }
 
     /**
      * remove user from lottery if conditions met
      */
-    fun leave(campsite: Campsite, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
-        val lottery = getActiveLottery(campsite.id, now)
-        if (lottery == null || !lottery.canLeave(userId)) {
+    fun leave(lottery: Lottery, userId: String, onDone: (Boolean) -> Unit = {}) {
+        if (!lottery.canLeave(userId)) {
             onDone(false)
             return
         }

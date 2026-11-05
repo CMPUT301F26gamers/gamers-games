@@ -7,5 +7,6 @@ data class Campsite(
     var name: String = "",
     var location: String = "",
     var date: Date = Date(),
-    var numGuests: Int = 0
+    var numGuests: Int = 0,
+    var ownerId: String = ""
 ) { }
