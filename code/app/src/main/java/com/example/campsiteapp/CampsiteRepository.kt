@@ -37,4 +37,8 @@ class CampsiteRepository {
             .addOnSuccessListener { println("Successfully deleted document: ${campsite.id}") }
             .addOnFailureListener { e -> println("Failed to delete document: ${e.message}") }
     }
+
+    fun getCampsitesByOwner(ownerId: String): List<Campsite> {
+        return _campsites.filter { it.ownerId == ownerId }
+    }
 }

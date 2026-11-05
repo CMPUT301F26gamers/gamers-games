@@ -44,6 +44,7 @@ import java.util.TimeZone
 fun CreateLotteryScreen(
     onBack: () -> Unit,
     onCreated: () -> Unit,
+    ownerId: String,
     campsites: List<Campsite>,
     vm: CreateLotteryViewModel,
     modifier: Modifier = Modifier
@@ -195,7 +196,7 @@ fun CreateLotteryScreen(
 
             // disable while saving to avoid duplicates
             Button(
-                onClick = { vm.createLottery() },
+                onClick = { vm.createLottery(ownerId) },
                 enabled = !vm.isSaving(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CampGreen,

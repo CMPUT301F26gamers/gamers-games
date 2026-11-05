@@ -128,7 +128,7 @@ class CreateLotteryViewModel(
     /**
      * Validates the form and saves a new lottery
      */
-    fun createLottery() {
+    fun createLottery(ownerId: String) {
         // Winners: must at least be a number, the model checks the range
         val winners = _winnersText.toIntOrNull()
         if (winners == null) {
@@ -165,8 +165,8 @@ class CreateLotteryViewModel(
         _isSaving = true
         _error = null
         try {
-            // Throws IllegalArgumentException before anything is saved if the input is invalid
             repo.createLottery(
+                ownerId = ownerId,
                 campsiteIds = _selectedCampsiteIds,
                 regStart = regStart,
                 regEnd = regEnd,
@@ -175,12 +175,11 @@ class CreateLotteryViewModel(
                 numWinners = winners,
                 waitlistCapacity = capacity
             ) { ok ->
-                // Runs once Firestore confirms or rejects the write
                 _isSaving = false
                 if (ok) _created = true else _error = "Could not save lottery"
             }
         } catch (e: IllegalArgumentException) {
-            fail(e.message ?: "Invalid input")   // the model's own messages
+            fail(e.message ?: "Invalid input")
         }
     }
 

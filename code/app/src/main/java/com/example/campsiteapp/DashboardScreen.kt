@@ -51,7 +51,9 @@ fun DashboardScreen(
 
         // Owner features
         if (profile?.hasRole(Roles.OWNER) == true) {
-            // Add owner-specific buttons here
+            if (profile?.hasRole(Roles.OWNER) == true) {
+                DashboardButton("Create Lottery", navController, "createLottery")
+            }
         }
 
         // Admin features
