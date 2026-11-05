@@ -29,12 +29,7 @@ enum class Roles {
  */
 class Profile (val uid: String = "", var name: String = "", var email: String = "",
                var phoneNumber: String = "", var profilePictureUrl: String = "",
-               var enableNotifications: Boolean = true) {
-
-    /**
-     * The user's roles. Always start as entrant
-     */
-    private val roles = mutableSetOf<Roles>(Roles.ENTRANT, Roles.ADMIN)
+               var enableNotifications: Boolean = true, val roles: MutableList<Roles> = mutableListOf<Roles>(Roles.ENTRANT)) {
 
     /**
      * Updates the profile information
@@ -79,7 +74,9 @@ class Profile (val uid: String = "", var name: String = "", var email: String = 
      * Adds a campsite owner role to the user
      */
     fun addRole(role: Roles){
-        roles.add(role)
+        if (!roles.contains(role)) {
+            roles.add(role)
+        }
     }
 
 }
