@@ -2,7 +2,7 @@ package com.example.campsiteapp
 
 import java.util.Date
 
-class Campsite(
+data class Campsite(
     var id: String = "",
     var name: String = "",
     var location: String = "",
