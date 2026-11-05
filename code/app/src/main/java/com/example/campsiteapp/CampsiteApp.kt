@@ -67,5 +67,16 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 )
             }
         }
+        composable("ownerLotteries") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                LotteryListScreen(
+                    profile = profile,
+                    lotteryRepo = lotteryRepo,
+                    campsiteRepo = campsiteRepo,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
     }
 }
