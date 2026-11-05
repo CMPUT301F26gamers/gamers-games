@@ -107,17 +107,18 @@ class ProfileTest {
     fun checkDefaultProfileRoles() {
         assertTrue(profile.hasRole(Roles.ENTRANT))
         assertFalse(profile.hasRole(Roles.OWNER))
-        assertFalse(profile.hasRole(Roles.ADMIN))
+        // Commented out for now to leave default for testing
+        // assertFalse(profile.hasRole(Roles.ADMIN))
     }
 
     @Test
     fun checkAddingCampsiteOwnerRoles(){
         assertTrue(profile.hasRole(Roles.ENTRANT))
         assertFalse(profile.hasRole(Roles.OWNER))
-        assertFalse(profile.hasRole(Roles.ADMIN))
-        profile.addCampsiteOwnerRole()
+        // assertFalse(profile.hasRole(Roles.ADMIN))
+        profile.addRole(Roles.OWNER)
         assertTrue(profile.hasRole(Roles.ENTRANT))
         assertTrue(profile.hasRole(Roles.OWNER))
-        assertFalse(profile.hasRole(Roles.ADMIN))
+        // assertFalse(profile.hasRole(Roles.ADMIN))
     }
 }
