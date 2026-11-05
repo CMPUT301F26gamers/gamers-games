@@ -1,15 +1,19 @@
 package com.example.campsiteapp
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.Assert.*
+import androidx.compose.ui.Modifier
 
 
 @RunWith(AndroidJUnit4::class)
@@ -27,7 +31,8 @@ class BrowseProfilesScreenTest {
     @Test
     fun testProfilesDisplayed() {
         composeTestRule.setContent {
-            BrowseProfilesScreen(profiles, {}, {})
+            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
+                LocalContext.current))
         }
 
         composeTestRule.onNodeWithText("Alex").assertExists()
@@ -38,7 +43,8 @@ class BrowseProfilesScreenTest {
     @Test
     fun testSearch() {
         composeTestRule.setContent {
-            BrowseProfilesScreen(profiles, {}, {})
+            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
+                LocalContext.current))
         }
 
         composeTestRule.onNodeWithTag("profileSearch")
@@ -54,11 +60,8 @@ class BrowseProfilesScreenTest {
         var viewedProfile: Profile? = null
 
         composeTestRule.setContent {
-            BrowseProfilesScreen(
-                profiles,
-                onDeleteProfile = {},
-                onViewProfile = { viewedProfile = it }
-            )
+            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
+                LocalContext.current))
         }
 
         composeTestRule.onNodeWithText("Alex").performClick()
@@ -71,11 +74,8 @@ class BrowseProfilesScreenTest {
         var deletedProfile: Profile? = null
 
         composeTestRule.setContent {
-            BrowseProfilesScreen(
-                profiles,
-                onDeleteProfile = { deletedProfile = it },
-                onViewProfile = {}
-            )
+            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
+                LocalContext.current))
         }
 
         composeTestRule.onNodeWithTag("removeButton_JaneEmail")
@@ -92,11 +92,8 @@ class BrowseProfilesScreenTest {
         var deletedProfile: Profile? = null
 
         composeTestRule.setContent {
-            BrowseProfilesScreen(
-                profiles,
-                onDeleteProfile = { deletedProfile = it },
-                onViewProfile = {}
-            )
+            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
+                LocalContext.current))
         }
 
         composeTestRule.onNodeWithTag("removeButton_1")

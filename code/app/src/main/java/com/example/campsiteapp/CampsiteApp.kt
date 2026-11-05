@@ -12,5 +12,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
 
     NavHost(navController, startDestination = "welcome") {
         composable("welcome") { WelcomeScreen( navController) }
+        composable("dashboard") { DashboardScreen(navController) }
+        composable("browseProfiles") { BrowseProfilesScreen( modifier,navController = navController) }
     }
 }

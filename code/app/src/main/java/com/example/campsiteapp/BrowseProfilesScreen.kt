@@ -25,12 +25,15 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 
 @Composable
-fun BrowseProfilesScreen (profiles: List<Profile>, onDeleteProfile: (Profile) -> Unit, onViewProfile: (Profile) -> Unit, modifier: Modifier = Modifier) {
+fun BrowseProfilesScreen (modifier: Modifier = Modifier, navController: NavController) {
     var search by remember { mutableStateOf("") }
+    val repository = ProfileRepository()
 
     Column(
         modifier = modifier
@@ -58,14 +61,14 @@ fun BrowseProfilesScreen (profiles: List<Profile>, onDeleteProfile: (Profile) ->
 
         LazyColumn {
             items(
-                profiles.filter {
+                repository.profiles.filter {
                     it.name.contains(search, ignoreCase = true)
                 }
             ) { profile ->
                 ProfileRow(
                     profile = profile,
-                    onDeleteProfile = onDeleteProfile,
-                    onViewProfile = onViewProfile
+                    onDeleteProfile = { repository.removeProfile(it) },
+                    onViewProfile = { navController.navigate("") }
                 )
             }
         }
@@ -155,8 +158,7 @@ fun BrowseProfilesPreview() {
     )
 
     BrowseProfilesScreen(
-        profiles = profiles,
-        onDeleteProfile = {},
-        onViewProfile = {}
+        modifier = Modifier.fillMaxSize(),
+        navController = NavController(LocalContext.current)
     )
 }

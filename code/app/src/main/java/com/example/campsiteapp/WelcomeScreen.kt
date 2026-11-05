@@ -63,7 +63,7 @@ fun WelcomeScreen (
                 repositiory.createOrLoadProfile(deviceId, { profile ->
                     AppUser.profile = profile
                 })
-                navController.navigate("welcome")
+                navController.navigate("dashboard")
                       },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF006838)
