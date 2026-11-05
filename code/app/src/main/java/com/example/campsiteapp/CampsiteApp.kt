@@ -22,5 +22,28 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 onDeleteProfile = { profile -> profilesRepository.removeProfile(profile) }
             )
         }
+        composable("profile") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                ProfileScreen(
+                    name = profile.name,
+                    email = profile.email,
+                    phone = profile.phoneNumber,
+                    onSave = { name, email, phone ->
+                        profile.updateProfileInformation(name = name, email = email, phoneNumber = phone)
+                        profilesRepository.addProfile(profile)
+                    },
+                    onBack = { navController.popBackStack() },
+                    onDelete = {
+                        profilesRepository.deleteProfile(profile)
+                        navController.navigate("welcome") {
+                            popUpTo(navController.graph.id) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
     }
 }
