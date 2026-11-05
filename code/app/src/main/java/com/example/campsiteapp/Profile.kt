@@ -27,14 +27,14 @@ enum class Roles {
  * @property profilePictureUrl The user's profile picture as a string
  * @property enableNotifications Whether the user wants to receive notifications
  */
-class Profile (val uid: String, var name: String = "", var email: String = "",
+class Profile (val uid: String = "", var name: String = "", var email: String = "",
                var phoneNumber: String = "", var profilePictureUrl: String = "",
                var enableNotifications: Boolean = true) {
 
     /**
      * The user's roles. Always start as entrant
      */
-    private val roles = mutableSetOf<Roles>(Roles.ENTRANT)
+    private val roles = mutableSetOf<Roles>(Roles.ENTRANT, Roles.ADMIN)
 
     /**
      * Updates the profile information
