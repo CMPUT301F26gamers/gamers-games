@@ -1,5 +1,6 @@
 package com.example.campsiteapp
 
+import java.util.Calendar
 import java.util.Date
 import kotlin.random.Random
 
@@ -46,7 +47,7 @@ class Lottery(
      * @param end last day of the stay
      */
     fun setLotteryPeriod(start: Date, end: Date, now: Date = Date()) {
-        if (start.before(now)) {
+        if (start.before(startOfToday(now))) {
             throw IllegalArgumentException("Start date cannot be in the past")
         }
         if (!start.before(end)) {
@@ -66,7 +67,7 @@ class Lottery(
      * @param end date of the registration period
      */
     fun setRegistrationPeriod(start: Date, end: Date, now: Date = Date()) {
-        if (start.before(now)) {
+        if (start.before(startOfToday(now))) {
             throw IllegalArgumentException("Start date cannot be in the past")
         }
         if (!start.before(end)) {
@@ -110,7 +111,7 @@ class Lottery(
         start: Date, end: Date,
         now: Date = Date()
     ) {
-        if (regStart.before(now)) {
+        if (regStart.before(startOfToday(now))) {
             throw IllegalArgumentException("Start date cannot be in the past")
         }
         if (!regStart.before(regEnd) || !bookStart.before(bookEnd) || !start.before(end)) {
@@ -279,5 +280,15 @@ class Lottery(
         if (!isBookingOpen(now) || !winners.remove(userId)) return false
         declined.add(userId)
         return true
+    }
+
+    private fun startOfToday(now: Date): Date {
+        val cal = Calendar.getInstance()
+        cal.time = now
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.time
     }
 }
