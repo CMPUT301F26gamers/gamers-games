@@ -77,11 +77,21 @@ class CreateLotteryViewModelTest {
 
     @Test
     fun missingDates_showsError_andDoesNotCallRepo() {
-        vm.createLottery()
+        vm.createLottery("owner1")
         assertEquals("Select registration, booking and stay periods", vm.getError())
         assertFalse(vm.isSaving())
         verify(exactly = 0) {
-            repo.createLottery(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            repo.createLottery(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
         }
     }
 
@@ -89,11 +99,21 @@ class CreateLotteryViewModelTest {
     fun invalidWinnersText_showsError_andDoesNotCallRepo() {
         fillValidForm()
         vm.onWinnersChange("abc")
-        vm.createLottery()
+        vm.createLottery("owner1")
         assertEquals("Number of winners must be a whole number of 1 or more", vm.getError())
         assertFalse(vm.isSaving())
         verify(exactly = 0) {
-            repo.createLottery(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            repo.createLottery(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
         }
     }
 
@@ -101,9 +121,19 @@ class CreateLotteryViewModelTest {
     fun modelMessageIsShownWhenRepoThrows() {
         fillValidForm()
         every {
-            repo.createLottery(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            repo.createLottery(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
         } throws IllegalArgumentException("Stay must start after booking ends")
-        vm.createLottery()
+        vm.createLottery("owner1")
         assertEquals("Stay must start after booking ends", vm.getError())
         assertFalse(vm.isSaving())
         assertFalse(vm.isCreated())
@@ -113,11 +143,21 @@ class CreateLotteryViewModelTest {
     fun successSetsCreated_andHandledResetsIt() {
         fillValidForm()
         every {
-            repo.createLottery(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            repo.createLottery(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
         } answers {
             lastArg<(Boolean) -> Unit>().invoke(true)
         }
-        vm.createLottery()
+        vm.createLottery("owner1")
         assertTrue(vm.isCreated())
         assertFalse(vm.isSaving())
         assertNull(vm.getError())
@@ -130,11 +170,21 @@ class CreateLotteryViewModelTest {
     fun saveFailure_showsError_andIsNotCreated() {
         fillValidForm()
         every {
-            repo.createLottery(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            repo.createLottery(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
         } answers {
             lastArg<(Boolean) -> Unit>().invoke(false)
         }
-        vm.createLottery()
+        vm.createLottery("owner1")
         assertEquals("Could not save lottery", vm.getError())
         assertFalse(vm.isCreated())
         assertFalse(vm.isSaving())

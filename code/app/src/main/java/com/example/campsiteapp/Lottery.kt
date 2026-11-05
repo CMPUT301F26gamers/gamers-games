@@ -26,6 +26,7 @@ import kotlin.random.Random
  */
 class Lottery(
     val id: String = "",
+    val ownerId: String = "",
     val campsiteIds: MutableList<String> = mutableListOf(),
     var lotteryStart: Date = Date(),
     var lotteryEnd: Date = Date(),

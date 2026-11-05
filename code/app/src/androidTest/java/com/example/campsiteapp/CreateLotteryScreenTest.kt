@@ -56,6 +56,7 @@ class CreateLotteryScreenTest {
                 CreateLotteryScreen(
                     onBack = onBack,
                     onCreated = onCreated,
+                    ownerId = "owner1",
                     campsites = campsites,
                     vm = vm
                 )
@@ -114,11 +115,21 @@ class CreateLotteryScreenTest {
     fun savedLottery_callsOnCreatedOnce_andResetsTheFlag() {
         fillValidForm()
         every {
-            repo.createLottery(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            repo.createLottery(any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any())
         } answers {
             lastArg<(Boolean) -> Unit>().invoke(true)
         }
-        vm.createLottery()   // isCreated is now true before the screen appears
+        vm.createLottery("owner1")  // isCreated is now true before the screen appears
 
         var createdCalls = 0
         showScreen(onCreated = { createdCalls++ })
@@ -132,7 +143,7 @@ class CreateLotteryScreenTest {
     fun whileSaving_buttonIsDisabled_andShowsCreating() {
         fillValidForm()
         // relaxed mock never calls onDone, so the save stays pending
-        vm.createLottery()
+        vm.createLottery("owner1")
 
         showScreen()
         rule.onNodeWithText("Creating...").assertExists()

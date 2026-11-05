@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
@@ -38,6 +39,7 @@ import com.example.campsiteapp.ui.theme.CampLabelGrey
 import com.example.campsiteapp.ui.theme.CampFieldGrey
 import com.example.campsiteapp.ui.theme.CampGreen
 import com.example.campsiteapp.ui.theme.CampGreenLight
+import com.example.campsiteapp.ui.theme.CampRed
 import com.example.campsiteapp.ui.theme.CampsiteAppTheme
 
 @Composable
@@ -47,6 +49,7 @@ fun ProfileScreen(
     phone: String,
     onSave: (String, String, String) -> Unit,
     onBack: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val validator = ProfileValidator()
@@ -58,6 +61,7 @@ fun ProfileScreen(
     var emailError by remember { mutableStateOf("") }
     var phoneError by remember { mutableStateOf("") }
     var saved by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -92,6 +96,7 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f)
                 .padding(16.dp)
         ) {
             Box(
@@ -222,7 +227,53 @@ fun ProfileScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = { showDeleteDialog = true },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CampRed,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .testTag("deleteProfileButton")
+            ) {
+                Text(text = "Delete profile", fontWeight = FontWeight.Bold)
+            }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Profile") },
+            text = {
+                Text("Are you sure you want to delete your profile? This is permanent and cannot be undone.")
+            },
+            confirmButton = {
+                TextButton(
+                    modifier = Modifier.testTag("confirmDelete"),
+                    onClick = {
+                        showDeleteDialog = false
+                        onDelete()
+                    }
+                ) {
+                    Text("Delete", color = CampRed)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    modifier = Modifier.testTag("cancelDelete"),
+                    onClick = { showDeleteDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -248,7 +299,8 @@ fun ProfileScreenPreview() {
             email = "alex@example.com",
             phone = "780-555-0123",
             onSave = { _, _, _ -> },
-            onBack = {}
+            onBack = {},
+            onDelete = {}
         )
     }
 }

@@ -2,11 +2,12 @@ package com.example.campsiteapp
 
 import androidx.compose.runtime.mutableStateListOf
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.firestore
 
-class ProfileRepository {
-    private val db = Firebase.firestore
-    private val profilesRef = db.collection("profiles")
+class ProfileRepository(
+    private val profilesRef: CollectionReference = Firebase.firestore.collection("profiles")
+) {
     private val _profiles = mutableStateListOf<Profile>()
 
     val profiles: List<Profile>
@@ -18,6 +19,15 @@ class ProfileRepository {
 
     fun removeProfile(profile: Profile) {
         profilesRef.document(profile.uid).delete()
+    }
+
+    fun deleteProfile(profile: Profile) {
+        removeProfile(profile)
+        _profiles.removeAll { it.uid == profile.uid }
+
+        if (AppUser.profile?.uid == profile.uid) {
+            AppUser.profile = null
+        }
     }
 
     fun createOrLoadProfile(uid: String, onSuccessfulLoad: (Profile) -> Unit) {
