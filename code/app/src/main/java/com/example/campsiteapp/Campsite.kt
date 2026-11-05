@@ -1,6 +1,11 @@
 package com.example.campsiteapp
 
+import java.util.Date
+
 class Campsite(
-    val id: String = "",
-    val name: String = ""
+    var id: String = "",
+    var name: String = "",
+    var location: String = "",
+    var date: Date = Date(),
+    var numGuests: Int = 0
 ) { }
