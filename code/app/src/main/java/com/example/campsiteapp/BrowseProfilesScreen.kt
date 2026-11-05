@@ -25,15 +25,19 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun BrowseProfilesScreen (modifier: Modifier = Modifier, navController: NavController) {
+fun BrowseProfilesScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    profiles: List<Profile>,
+    onDeleteProfile: (Profile) -> Unit
+) {
     var search by remember { mutableStateOf("") }
-    val repository = ProfileRepository()
 
     Column(
         modifier = modifier
@@ -61,13 +65,13 @@ fun BrowseProfilesScreen (modifier: Modifier = Modifier, navController: NavContr
 
         LazyColumn {
             items(
-                repository.profiles.filter {
+                profiles.filter {
                     it.name.contains(search, ignoreCase = true)
                 }
             ) { profile ->
                 ProfileRow(
                     profile = profile,
-                    onDeleteProfile = { repository.removeProfile(it) },
+                    onDeleteProfile = onDeleteProfile,
                     onViewProfile = { navController.navigate("") }
                 )
             }
@@ -128,6 +132,7 @@ fun ProfileRow(
             },
             confirmButton = {
                 TextButton(
+                    modifier = Modifier.testTag("confirmRemove"),
                     onClick = {
                         onDeleteProfile(profile)
                         showDialog = false
@@ -138,6 +143,7 @@ fun ProfileRow(
             },
             dismissButton = {
                 TextButton(
+                    modifier = Modifier.testTag("cancelRemove"),
                     onClick = { showDialog = false }
                 ) {
                     Text("Cancel")
@@ -159,6 +165,8 @@ fun BrowseProfilesPreview() {
 
     BrowseProfilesScreen(
         modifier = Modifier.fillMaxSize(),
-        navController = NavController(LocalContext.current)
+        navController = rememberNavController(),
+        profiles = profiles,
+        onDeleteProfile = {}
     )
 }

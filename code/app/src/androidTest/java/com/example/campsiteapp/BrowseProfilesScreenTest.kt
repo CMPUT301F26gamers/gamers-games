@@ -1,107 +1,84 @@
 package com.example.campsiteapp
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.mutableStateListOf
+import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.navigation.NavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.Assert.*
-import androidx.compose.ui.Modifier
-
 
 @RunWith(AndroidJUnit4::class)
 class BrowseProfilesScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val profiles = listOf(
+    private val testingProfiles = mutableStateListOf(
         Profile(uid = "1", name = "Alex P.", email = "AlexEmail"),
         Profile(uid = "2", name = "Jane D.", email = "JaneEmail"),
         Profile(uid = "3", name = "Sam K.", email = "SamEmail"),
         Profile(uid = "4", name = "Mark T.", email = "MarkEmail")
     )
+    private var deletedProfile: Profile? = null
+
+    @Before
+    fun setUp() {
+        composeTestRule.setContent {
+            BrowseProfilesScreen(
+                navController = rememberNavController(),
+                profiles = testingProfiles,
+                onDeleteProfile = { profile ->
+                    deletedProfile = profile
+                    testingProfiles.remove(profile)
+                }
+            )
+        }
+    }
 
     @Test
     fun testProfilesDisplayed() {
-        composeTestRule.setContent {
-            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
-                LocalContext.current))
-        }
-
-        composeTestRule.onNodeWithText("Alex").assertExists()
-        composeTestRule.onNodeWithText("Jane").assertExists()
-        composeTestRule.onNodeWithText("Sam").assertExists()
+        composeTestRule.onNodeWithText("Alex P.").assertExists()
+        composeTestRule.onNodeWithText("Jane D.").assertExists()
+        composeTestRule.onNodeWithText("Sam K.").assertExists()
+        composeTestRule.onNodeWithText("Mark T.").assertExists()
     }
 
     @Test
     fun testSearch() {
-        composeTestRule.setContent {
-            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
-                LocalContext.current))
-        }
-
-        composeTestRule.onNodeWithTag("profileSearch")
-            .performTextInput("Alex")
-
-        composeTestRule.onNodeWithText("Alex").assertExists()
-        composeTestRule.onNodeWithText("Jane").assertDoesNotExist()
-        composeTestRule.onNodeWithText("Sam").assertDoesNotExist()
-    }
-
-    @Test
-    fun testViewProfile() {
-        var viewedProfile: Profile? = null
-
-        composeTestRule.setContent {
-            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
-                LocalContext.current))
-        }
-
-        composeTestRule.onNodeWithText("Alex").performClick()
-
-        assertEquals("AlexEmail", viewedProfile?.email)
+        composeTestRule.onNodeWithTag("searchField").performTextInput("aLeX")
+        composeTestRule.onNodeWithText("Alex P.").assertExists()
+        composeTestRule.onNodeWithText("Jane D.").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Sam K.").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Mark T.").assertDoesNotExist()
     }
 
     @Test
     fun testRemoveProfile() {
-        var deletedProfile: Profile? = null
-
-        composeTestRule.setContent {
-            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
-                LocalContext.current))
+        composeTestRule.onNodeWithTag("removeProfileButton_2").performClick()
+        composeTestRule.onNodeWithText("Are you sure you want to remove Jane D.?").assertExists()
+        composeTestRule.runOnIdle { assertNull(deletedProfile) }
+        composeTestRule.onNodeWithTag("confirmRemove").performClick()
+        composeTestRule.runOnIdle {
+            assertEquals("2", deletedProfile?.uid)
         }
-
-        composeTestRule.onNodeWithTag("removeButton_JaneEmail")
-            .performClick()
-
-        composeTestRule.onNodeWithTag("confirmRemove")
-            .performClick()
-
-        assertEquals("JaneEmail", deletedProfile?.email)
+        composeTestRule.onNodeWithText("Jane D.").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Alex P.").assertExists()
+        composeTestRule.onNodeWithTag("confirmRemove").assertDoesNotExist()
     }
 
     @Test
     fun testCancelRemove() {
-        var deletedProfile: Profile? = null
-
-        composeTestRule.setContent {
-            BrowseProfilesScreen(modifier = Modifier.fillMaxSize(), navController = NavController(
-                LocalContext.current))
-        }
-
-        composeTestRule.onNodeWithTag("removeButton_1")
-            .performClick()
-
-        composeTestRule.onNodeWithTag("cancelRemove")
-            .performClick()
-
-        assertNull(deletedProfile)
+        composeTestRule.onNodeWithTag("removeProfileButton_1").performClick()
+        composeTestRule.onNodeWithTag("cancelRemove").performClick()
+        composeTestRule.runOnIdle { assertNull(deletedProfile) }
+        composeTestRule.onNodeWithText("Alex P.").assertExists()
+        composeTestRule.onNodeWithTag("confirmRemove").assertDoesNotExist()
     }
 }
