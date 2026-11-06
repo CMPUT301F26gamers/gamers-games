@@ -29,7 +29,8 @@ class CampsiteScreenTest {
                 onAddCampsite = { campsiteRepo.addCampsite(it) },
                 onRemoveCampsite = { campsiteRepo.removeCampsite(it) },
                 onBack = {},
-                isAdmin = true
+                isAdmin = true,
+                navController = null
             )
         }
     }
