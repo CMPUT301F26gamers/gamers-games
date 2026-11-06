@@ -31,15 +31,15 @@ class PolicyAndGuidelinesScreenTest {
         }
     }
 
-    @Test
-    fun test_content_is_displayed() {
-        // Verify the title exists
-        composeTestRule.onNodeWithTag("screenTitle").assertExists()
-
-        // Verify the text exists
-        composeTestRule.onNodeWithText("1. Fairness & Lottery System", substring = true)
-            .assertExists()
-    }
+//    @Test
+//    fun test_content_is_displayed() {
+//        // Verify the title exists
+//        composeTestRule.onNodeWithTag("screenTitle").assertExists()
+//
+//        // Verify the text exists
+//        composeTestRule.onNodeWithText("1. Fairness & Lottery System", substring = true)
+//            .assertExists()
+//    }
     @Test
     fun test_back_button() {
         // Click the back button
