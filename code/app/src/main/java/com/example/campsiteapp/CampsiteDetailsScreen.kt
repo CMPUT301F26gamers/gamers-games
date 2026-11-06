@@ -120,8 +120,15 @@ fun CampsiteDetailsScreen(
                 Text(
                     text = campsite.description,
                     fontSize = 30.sp,
-                    modifier = Modifier
+                    modifier = Modifier.testTag("descriptionText")
                 )
+                if (campsite.tags.isNotEmpty()) {
+                    Text(
+                        text = "Tags: " + campsite.tags.joinToString(", "),
+                        fontSize = 30.sp,
+                        modifier = Modifier.testTag("tagsText")
+                    )
+                }
             }
         }
         if (showUserFields) {
