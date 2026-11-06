@@ -37,9 +37,9 @@ class PolicyAndGuidelinesScreenTest {
         composeTestRule.onNodeWithTag("screenTitle").assertExists()
 
         // Verify the text exists
-        composeTestRule.onNodeWithText("RANDOM TEXT GO", substring = true).assertExists()
+        composeTestRule.onNodeWithText("1. Fairness & Lottery System", substring = true)
+            .assertExists()
     }
-
     @Test
     fun test_back_button() {
         // Click the back button

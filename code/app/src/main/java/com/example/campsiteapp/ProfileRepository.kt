@@ -2,6 +2,7 @@ package com.example.campsiteapp
 
 import androidx.compose.runtime.mutableStateListOf
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.firestore
 
@@ -15,6 +16,25 @@ class ProfileRepository(
 
     fun addProfile(profile: Profile) {
         profilesRef.document(profile.uid).set(profile)
+    }
+
+    // This photo implementation was provided via Codex (2026-11-05):
+    // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+    fun saveContactInformation(profile: Profile) {
+        profilesRef.document(profile.uid).update(
+            mapOf("name" to profile.name, "email" to profile.email, "phoneNumber" to profile.phoneNumber)
+        )
+    }
+
+    // This photo implementation was provided via Codex (2026-11-05):
+    // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+    fun saveProfilePicture(profile: Profile, picture: Blob, onComplete: (Boolean) -> Unit) {
+        profilesRef.document(profile.uid).update("profilePicture", picture)
+            .addOnSuccessListener {
+                profile.profilePicture = picture
+                onComplete(true)
+            }
+            .addOnFailureListener { onComplete(false) }
     }
 
     fun removeProfile(profile: Profile) {

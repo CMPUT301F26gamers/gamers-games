@@ -22,7 +22,7 @@ class CampsiteDetailsScreenTest {
                     "1",
                     "Balls",
                     location = "Jasper, AB",
-                    numGuests = 6,
+                    occupancy = 6,
                     description = "Fire pit and picnic table",
                     tags = listOf("lakeside", "pet friendly")
                 ),
