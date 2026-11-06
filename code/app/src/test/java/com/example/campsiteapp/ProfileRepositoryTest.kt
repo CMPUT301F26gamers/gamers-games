@@ -9,6 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Test
@@ -17,6 +18,8 @@ class ProfileRepositoryTest {
 
     private val ref = mockk<CollectionReference>(relaxed = true)
     private val repo = ProfileRepository(ref)
+    private val campsiteRepo = mockk<CampsiteRepo>(relaxUnitFun = true)
+    private val lotteryRepo = mockk<LotteryRepository>(relaxUnitFun = true)
 
     @After
     fun tearDown() {
@@ -98,5 +101,42 @@ class ProfileRepositoryTest {
     fun deleteProfileOnlyDeletesThatProfile() {
         repo.deleteProfile(Profile("u1"))
         verify(exactly = 0) { ref.document("u2") }
+    }
+
+    // These tests were written by codex (2026-11-05): "Write test for the cascade deletion of the profiles
+    @Test
+    fun unlinksOwnedCampsitesFromLotteriesBeforeDeletingTheProfile() {
+        val profile = Profile(uid = "owner")
+        val lake = Campsite(id = "lake", ownerId = profile.uid)
+        val forest = Campsite(id = "forest", ownerId = profile.uid)
+        val lottery = Lottery(id = "lottery")
+        every { campsiteRepo.getCampsitesByOwner(profile.uid) } returns listOf(lake, forest)
+        every { lotteryRepo.getLotteries(lake.id) } returns listOf(lottery)
+        every { lotteryRepo.getLotteries(forest.id) } returns emptyList()
+
+        repo.cascadeDeleteProfile(profile, campsiteRepo, lotteryRepo)
+
+        verifyOrder {
+            campsiteRepo.getCampsitesByOwner(profile.uid)
+            lotteryRepo.getLotteries(lake.id)
+            lotteryRepo.removeCampsite(lottery.id, lake.id, any())
+            campsiteRepo.removeCampsite(lake)
+            lotteryRepo.getLotteries(forest.id)
+            campsiteRepo.removeCampsite(forest)
+            ref.document(profile.uid).delete()
+        }
+    }
+
+    @Test
+    fun removesProfileEvenWhenItOwnsNoCampsites() {
+        val profile = Profile(uid = "entrant")
+        every { campsiteRepo.getCampsitesByOwner(profile.uid) } returns emptyList()
+
+        repo.cascadeDeleteProfile(profile, campsiteRepo, lotteryRepo)
+
+        verifyOrder {
+            campsiteRepo.getCampsitesByOwner(profile.uid)
+            ref.document(profile.uid).delete()
+        }
     }
 }
