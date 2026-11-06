@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
-import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.Date
 
@@ -74,6 +73,11 @@ class CampsiteRepository : CampsiteRepo {
         campsitesRef.document(campsite.id).delete()
             .addOnSuccessListener { println("Successfully deleted document: ${campsite.id}") }
             .addOnFailureListener { e -> println("Failed to delete document: ${e.message}") }
+    }
+
+    fun get(campID: String?): Campsite? {
+        if (campID == null) return null
+        return _campsites.firstOrNull { it.id == campID }
     }
 
     override fun getCampsitesByOwner(ownerId: String): List<Campsite> {

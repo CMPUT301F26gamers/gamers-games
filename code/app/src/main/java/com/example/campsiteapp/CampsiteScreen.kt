@@ -1,6 +1,5 @@
 package com.example.campsiteapp
 
-import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +19,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -41,12 +38,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.campsiteapp.ui.theme.CampBackground
-import com.example.campsiteapp.ui.theme.CampError
 import com.example.campsiteapp.ui.theme.CampGreen
 import com.example.campsiteapp.ui.theme.CampsiteAppTheme
 import java.util.Date
-import kotlin.compareTo
 
 @Composable
 fun CampsiteScreen(
@@ -55,6 +51,7 @@ fun CampsiteScreen(
     onRemoveCampsite: (Campsite) -> Unit,
     onBack: () -> Unit,
     isAdmin: Boolean,
+    navController: NavController?,
     modifier: Modifier = Modifier
 ) {
     var newCampsiteName by remember { mutableStateOf("") }
@@ -111,6 +108,7 @@ fun CampsiteScreen(
                 value = searchBarText,
                 onValueChange = {
                     searchBarText = it
+                    repository.searchQuery = searchBarText
                 },
                 label = { Text("Search") },
                 colors = fieldColors(),
@@ -146,6 +144,7 @@ fun CampsiteScreen(
                     value = filterLocation,
                     onValueChange = {
                         filterLocation = it
+                        repository.selectedLocation = filterLocation
                     },
                     label = { Text("Location") },
                     colors = fieldColors(),
@@ -163,6 +162,7 @@ fun CampsiteScreen(
                     ),
                     onValueChange = {
                         filterGuests = it
+                        repository.minGuests = filterGuests.toIntOrNull()?.coerceAtLeast(0) ?: 0
                     },
                     label = { Text("Min Guests") },
                     colors = fieldColors(),
@@ -276,12 +276,17 @@ fun CampsiteScreen(
                     onClick = {
                         if (showRemoveCampsiteFields) {
                             onRemoveCampsite(campsite)
+                        } else if (navController != null) {
+                            navController.navigate("campsiteDetails/${campsite.id}")
                         }
                     }
                 )
             }
         }
     }
+    repository.searchQuery = searchBarText
+    repository.selectedLocation = filterLocation
+    repository.minGuests = filterGuests.toIntOrNull()?.coerceAtLeast(0) ?: 0
 }
 
 @Preview(showBackground = true)
@@ -297,7 +302,8 @@ fun CampsiteScreenPreview() {
             onAddCampsite = { _ ->},
             onRemoveCampsite = { _ -> },
             onBack = {},
-            isAdmin = true
+            isAdmin = true,
+            navController = null
         )
     }
 }

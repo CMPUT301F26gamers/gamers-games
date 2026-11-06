@@ -1,6 +1,5 @@
 package com.example.campsiteapp
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -8,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.compose.ui.Modifier
+import java.util.Date
 import java.util.UUID
 
 @Composable
@@ -123,7 +123,8 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     onAddCampsite = { campsiteRepo.addCampsite(it) },
                     onRemoveCampsite = { campsiteRepo.removeCampsite(it) },
                     onBack = { navController.popBackStack() },
-                    isAdmin = profile.hasRole(Roles.ADMIN)
+                    isAdmin = profile.hasRole(Roles.ADMIN),
+                    navController = navController
                 )
             }
         }
@@ -182,6 +183,23 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     ) else listOf(),
                     capacity = lottery?.waitlistCapacity,
                     isDrawComplete = lottery?.drawn == true,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
+        composable("campsiteDetails/{campsiteID}") { backStackEntry ->
+            val campsiteID = backStackEntry.arguments?.getString("campsiteID")
+            println(campsiteID)
+            val campsite = campsiteRepo.get(campsiteID)
+            val profile = AppUser.profile
+            if (profile != null && campsite != null) {
+                CampsiteDetailsScreen(
+                    campsite = campsite,
+                    profile = profile,
+                    lotteries = lotteryRepo.getLotteries(campsite.id),
+                    joinStateOf = { lotteryRepo.joinState(it, profile.uid, Date()) },
+                    onJoin = { lottery, done -> lotteryRepo.enter(lottery, profile.uid, Date(), done) },
+                    onLeave = { lottery, done -> lotteryRepo.leave(lottery, profile.uid, done) },
                     onBack = { navController.popBackStack() }
                 )
             }
