@@ -28,6 +28,8 @@ enum class Roles {
  * @property phoneNumber The user's phone number
  * @property profilePictureUrl The user's profile picture as a string
  * @property enableNotifications Whether the user wants to receive notifications
+ * @property roles The roles assigned to the user
+ * @property profilePicture The saved picture data, or null if none is set
  */
 class Profile (val uid: String = "", var name: String = "", var email: String = "",
                var phoneNumber: String = "", var profilePictureUrl: String = "",
@@ -43,6 +45,7 @@ class Profile (val uid: String = "", var name: String = "", var email: String = 
      * @param email The user's email as a string or NULL
      * @param phoneNumber The user's phone number as a string or NULL
      * @param profilePictureUrl The user's profile picture as a string or NULL
+     * @param enableNotifications The user's notification preference or NULL
      */
     fun updateProfileInformation(name: String? = null, email: String? = null,
                                  phoneNumber: String? = null, profilePictureUrl: String? = null, enableNotifications: Boolean? = null){
@@ -74,7 +77,9 @@ class Profile (val uid: String = "", var name: String = "", var email: String = 
     }
 
     /**
-     * Adds a campsite owner role to the user
+     * Adds a role to the user if they do not already have it
+     *
+     * @param role The role to add
      */
     fun addRole(role: Roles){
         if (!roles.contains(role)) {
