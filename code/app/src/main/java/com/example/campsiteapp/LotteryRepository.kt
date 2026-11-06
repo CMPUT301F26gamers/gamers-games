@@ -139,6 +139,49 @@ class LotteryRepository (
     }
 
     /**
+     * Applies the edit form to an existing lottery and saves it.
+     * Throws IllegalArgumentException (the model's own messages) if the input is invalid.
+     */
+    fun updateLottery(
+        lotteryId: String,
+        campsiteIds: List<String>,
+        regStart: Date, regEnd: Date,
+        bookStart: Date, bookEnd: Date,
+        start: Date, end: Date,
+        numWinners: Int,
+        waitlistCapacity: Int?,
+        onDone: (Boolean) -> Unit
+    ) {
+        val lottery = findLottery(lotteryId)
+        if (lottery == null) {
+            onDone(false)
+            return
+        }
+        if (campsiteIds.isEmpty()) {
+            throw IllegalArgumentException("Select at least one campsite")
+        }
+        if (campsiteIds.toSet().size != campsiteIds.size) {
+            throw IllegalArgumentException("Duplicate campsites selected")
+        }
+
+        lottery.setPeriods(regStart, regEnd, bookStart, bookEnd, start, end)
+
+        // The two setters check each other, so the order depends on which way capacity moves
+        if (waitlistCapacity == null || waitlistCapacity >= lottery.numWinners) {
+            lottery.updateWaitlistCapacity(waitlistCapacity)
+            lottery.updateNumWinners(numWinners)
+        } else {
+            lottery.updateNumWinners(numWinners)
+            lottery.updateWaitlistCapacity(waitlistCapacity)
+        }
+
+        lottery.campsiteIds.clear()
+        lottery.campsiteIds.addAll(campsiteIds)
+
+        save(lottery, onDone)
+    }
+
+    /**
      *  every lottery whose registration is open right now
      */
     fun allActiveLotteries(now: Date): List<Lottery> {
