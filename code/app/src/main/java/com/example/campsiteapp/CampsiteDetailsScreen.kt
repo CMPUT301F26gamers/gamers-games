@@ -20,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,8 @@ fun CampsiteDetailsScreen(
     onBack: () -> Unit
 ) {
     var showUserFields by remember { mutableStateOf(false) }
+    var showRateFields by remember { mutableStateOf(false) }
+    var rating by remember { mutableStateOf("") }
     if (profile.hasRole(Roles.ENTRANT)) {
         showUserFields = true
     }
@@ -130,6 +133,20 @@ fun CampsiteDetailsScreen(
                 Button(
                     onClick = { },
                     colors = ButtonDefaults.buttonColors(
+                        containerColor = CampGreenLight,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .testTag("lotteryButton")
+                ) {
+                    Text(
+                        text = "Enter Lottery"
+                    )
+                }
+                Button(
+                    onClick = { showRateFields = !showRateFields },
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = CampGreen,
                         contentColor = Color.Black
                     ),
@@ -183,6 +200,43 @@ fun CampsiteDetailsScreen(
                 }
             }
         }
+
+        if (showRateFields) {
+            Column(
+                modifier = modifier.fillMaxSize()
+            ) {
+                TextField(
+                    value = rating,
+                    onValueChange = { rating = it },
+                    label = { Text("Rating (1-5)") },
+                    colors = fieldColors(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("rating")
+                )
+                Button(
+                    onClick = {
+                        if (rating.isNotBlank()) {
+                            campsite.addRating(profile.uid, rating = rating.toInt())
+                            showRateFields = !showRateFields
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CampGreenLight,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .testTag("leaveRatingButton")
+                ) {
+                    Text(
+                        text = "Leave Rating"
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
 
         Box(
             modifier = Modifier
@@ -272,7 +326,7 @@ fun CampsiteDetailsScreenPreview() {
                 "1", "Balls", "Edmonton",
                 occupancy = 4,
                 description = "A beautiful campsite in the heart of Edmonton.",
-                averageRating = 4.0
+                averageRating = 0.0
             ),
             profile = Profile(uid = "1"),
             lotteries = emptyList(),

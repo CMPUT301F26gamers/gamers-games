@@ -4,6 +4,9 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import junit.framework.TestCase.assertEquals
+import org.junit.Before
 import androidx.compose.ui.test.performScrollTo
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -82,5 +85,28 @@ class CampsiteDetailsScreenTest {
     fun notOpen_joinIsDisabled() {
         show(listOf(lottery()), JoinState.NOT_OPEN)
         composeTestRule.onNodeWithTag("joinButton_L1").assertIsNotEnabled()
+    }
+
+    @Test
+    fun addRating_computesAverageForTwoUsers() {
+
+        val campsite = Campsite()
+
+        campsite.addRating("user1", 4)
+        campsite.addRating("user2", 2)
+
+        assertEquals(3.0, campsite.averageRating)
+    }
+
+    @Test
+    fun addRating_replacesExistingUserRating() {
+
+        val campsite = Campsite()
+
+        campsite.addRating("user1", 5)
+        campsite.addRating("user1", 1)
+
+        assertEquals(1, campsite.ratings.size)
+        assertEquals(1.0, campsite.averageRating)
     }
 }
