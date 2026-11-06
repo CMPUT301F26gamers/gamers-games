@@ -24,6 +24,7 @@ class ProfileScreenTest {
     private var savedName = ""
     private var savedEmail = ""
     private var savedPhone = ""
+    private var deleteCalled = false
 
     @Before
     fun setUp() {
@@ -38,7 +39,10 @@ class ProfileScreenTest {
                     savedEmail = email
                     savedPhone = phone
                 },
-                onBack = {}
+                onBack = {},
+                onDelete = {
+                    deleteCalled = true
+                }
             )
         }
     }
@@ -151,5 +155,82 @@ class ProfileScreenTest {
         composeTestRule
             .onNodeWithText("Name can't be empty")
             .assertExists()
+    }
+
+    @Test
+    fun delete_profile_button_is_shown() {
+        composeTestRule
+            .onNodeWithTag("deleteProfileButton")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithText("Delete profile")
+            .assertExists()
+    }
+
+    @Test
+    fun delete_shows_permanent_warning_and_does_not_delete_yet() {
+        composeTestRule
+            .onNodeWithTag("deleteProfileButton")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Are you sure you want to delete your profile? This is permanent and cannot be undone.")
+            .assertExists()
+
+        composeTestRule.runOnIdle { assertFalse(deleteCalled) }
+    }
+
+    @Test
+    fun confirm_delete_deletes_profile_and_closes_dialog() {
+        composeTestRule
+            .onNodeWithTag("deleteProfileButton")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("confirmDelete")
+            .performClick()
+
+        composeTestRule.runOnIdle { assertTrue(deleteCalled) }
+
+        composeTestRule
+            .onNodeWithTag("confirmDelete")
+            .assertDoesNotExist()
+    }
+
+    @Test
+    fun cancel_delete_keeps_profile_unchanged() {
+        composeTestRule
+            .onNodeWithTag("deleteProfileButton")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("cancelDelete")
+            .performClick()
+
+        composeTestRule.runOnIdle { assertFalse(deleteCalled) }
+        assertFalse(saveCalled)
+
+        composeTestRule
+            .onNodeWithTag("confirmDelete")
+            .assertDoesNotExist()
+
+        composeTestRule
+            .onNodeWithText("Alex P.")
+            .assertExists()
+    }
+
+    @Test
+    fun delete_does_not_save_profile() {
+        composeTestRule
+            .onNodeWithTag("deleteProfileButton")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("confirmDelete")
+            .performClick()
+
+        composeTestRule.runOnIdle { assertTrue(deleteCalled) }
+        assertFalse(saveCalled)
     }
 }

@@ -16,8 +16,8 @@ class LotteryRepositoryTest {
 
     private fun date(day: Int, month: Int, year: Int): Date =
         Date.from(
-            LocalDate.of(year, month, day).
-            atStartOfDay(ZoneId.systemDefault())
+            LocalDate.of(year, month, day)
+                .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
         )
 
@@ -25,10 +25,13 @@ class LotteryRepositoryTest {
     private val inReg = date(5, 6, 2099)
     private val afterReg = date(10, 6, 2099)
 
-    private fun campsite(id: String) = Campsite(id)
-
-    private fun addLottery(id: String, ids: List<String>, capacity: Int? = null): Lottery {
-        val l = Lottery(id = id, campsiteIds = ids.toMutableList())
+    private fun addLottery(
+        id: String,
+        ids: List<String>,
+        capacity: Int? = null,
+        ownerId: String = "owner1"
+    ): Lottery {
+        val l = Lottery(id = id, ownerId = ownerId, campsiteIds = ids.toMutableList())
         l.setPeriods(
             date(1, 6, 2099), date(9, 6, 2099),
             date(10, 6, 2099), date(19, 6, 2099),
@@ -39,7 +42,8 @@ class LotteryRepositoryTest {
         return l
     }
 
-    private fun create(ids: List<String>) = repo.createLottery(
+    private fun create(ids: List<String>, ownerId: String = "owner1") = repo.createLottery(
+        ownerId = ownerId,
         campsiteIds = ids,
         regStart = date(1, 6, 2099), regEnd = date(9, 6, 2099),
         bookStart = date(10, 6, 2099), bookEnd = date(19, 6, 2099),
@@ -54,6 +58,9 @@ class LotteryRepositoryTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun createLotteryWithDuplicateCampsitesThrows() = create(listOf("camp1", "camp1"))
+
+    @Test(expected = IllegalArgumentException::class)
+    fun createLotteryWithBlankOwnerThrows() = create(listOf("camp1"), ownerId = "")
 
     @Test
     fun createLotterySavesToFirestore() {
@@ -79,6 +86,16 @@ class LotteryRepositoryTest {
     }
 
     @Test
+    fun getLotteriesByOwnerFiltersByOwner() {
+        addLottery("l1", listOf("camp1"), ownerId = "ownerA")
+        addLottery("l2", listOf("camp2"), ownerId = "ownerA")
+        addLottery("l3", listOf("camp3"), ownerId = "ownerB")
+        assertEquals(2, repo.getLotteriesByOwner("ownerA").size)
+        assertEquals(1, repo.getLotteriesByOwner("ownerB").size)
+        assertTrue(repo.getLotteriesByOwner("nobody").isEmpty())
+    }
+
+    @Test
     fun getActiveLotteryOnlyDuringRegistration() {
         val l = addLottery("l1", listOf("camp1"))
         assertEquals(l, repo.getActiveLottery("camp1", inReg))
@@ -94,58 +111,35 @@ class LotteryRepositoryTest {
         assertTrue(repo.allActiveLotteries(beforeReg).isEmpty())
     }
 
-    // joinState (replaces the old EntryResult tests)
+    // joinState
 
     @Test
     fun joinStateCanJoin() {
-        addLottery("l1", listOf("camp1"))
-        assertEquals(JoinState.CAN_JOIN,
-            repo.joinState(campsite("camp1"),
-                "u1", inReg)
-        )
+        val l = addLottery("l1", listOf("camp1"))
+        assertEquals(JoinState.CAN_JOIN, repo.joinState(l, "u1", inReg))
     }
 
     @Test
     fun joinStateNotOpen() {
-        addLottery("l1", listOf("camp1"))
-        assertEquals(JoinState.NOT_OPEN,
-            repo.joinState(campsite("camp1"),
-                "u1", beforeReg)
-        )
-        assertEquals(JoinState.NOT_OPEN,
-            repo.joinState(campsite("camp1"),
-                "u1",
-                afterReg)
-        )
-        assertEquals(JoinState.NOT_OPEN,
-            repo.joinState(campsite("camp2"),
-                "u1",
-                inReg)
-        )
+        val l = addLottery("l1", listOf("camp1"))
+        assertEquals(JoinState.NOT_OPEN, repo.joinState(l, "u1", beforeReg))
+        assertEquals(JoinState.NOT_OPEN, repo.joinState(l, "u1", afterReg))
     }
 
     @Test
     fun joinStateOnWaitlistAndFull() {
         val l = addLottery("l1", listOf("camp1"), capacity = 1)
         l.waitlist.add("u1")
-        assertEquals(JoinState.ON_WAITLIST,
-            repo.joinState(campsite("camp1"),
-                "u1",
-                inReg)
-        )
-        assertEquals(JoinState.WAITLIST_FULL,
-            repo.joinState(campsite("camp1"),
-                "u2",
-                inReg)
-        )
+        assertEquals(JoinState.ON_WAITLIST, repo.joinState(l, "u1", inReg))
+        assertEquals(JoinState.WAITLIST_FULL, repo.joinState(l, "u2", inReg))
     }
 
     // enter / leave
 
     @Test
     fun enterWritesToFirestore() {
-        addLottery("l1", listOf("camp1"))
-        repo.enter(campsite("camp1"), "u1", inReg)
+        val l = addLottery("l1", listOf("camp1"))
+        repo.enter(l, "u1", inReg)
         verify { ref.document("l1") }
     }
 
@@ -154,18 +148,18 @@ class LotteryRepositoryTest {
         val l = addLottery("l1", listOf("camp1"), capacity = 1)
         l.waitlist.add("u1")
         var result: Boolean? = null
-        repo.enter(campsite("camp1"), "u2", inReg) { result = it }   // full
+        repo.enter(l, "u2", inReg) { result = it }      // full
         assertEquals(false, result)
-        repo.enter(campsite("camp1"), "u2", beforeReg) { result = it } // closed
+        repo.enter(l, "u2", beforeReg) { result = it }  // closed
         assertEquals(false, result)
         verify(exactly = 0) { ref.document(any()) }
     }
 
     @Test
     fun leaveRefusedWhenNotOnWaitlist() {
-        addLottery("l1", listOf("camp1"))
+        val l = addLottery("l1", listOf("camp1"))
         var result: Boolean? = null
-        repo.leave(campsite("camp1"), "u1", inReg) { result = it }
+        repo.leave(l, "u1") { result = it }
         assertEquals(false, result)
         verify(exactly = 0) { ref.document(any()) }
     }
@@ -174,7 +168,7 @@ class LotteryRepositoryTest {
     fun leaveWritesToFirestoreWhenOnWaitlist() {
         val l = addLottery("l1", listOf("camp1"))
         l.waitlist.add("u1")
-        repo.leave(campsite("camp1"), "u1", inReg)
+        repo.leave(l, "u1")
         verify { ref.document("l1") }
     }
 
@@ -184,10 +178,7 @@ class LotteryRepositoryTest {
     fun removeCampsiteKeepsLotteryIfNotEmpty() {
         addLottery("l1", listOf("camp1", "camp2"))
         repo.removeCampsite("l1", "camp1")
-        assertEquals(
-            listOf("camp2"),
-            repo.findLottery("l1")!!.campsiteIds
-        )
+        assertEquals(listOf("camp2"), repo.findLottery("l1")!!.campsiteIds)
         verify { ref.document("l1") }
     }
 
