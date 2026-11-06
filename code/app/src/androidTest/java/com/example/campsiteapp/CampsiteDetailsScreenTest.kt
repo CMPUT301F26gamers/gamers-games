@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -58,7 +59,7 @@ class CampsiteDetailsScreenTest {
         var joined = false
         show(listOf(lottery()), JoinState.CAN_JOIN, onJoin = { joined = true })
 
-        composeTestRule.onNodeWithTag("joinButton_L1").performClick()
+        composeTestRule.onNodeWithTag("joinButton_L1").performScrollTo().performClick()
         assertTrue(joined)
     }
 
@@ -67,7 +68,7 @@ class CampsiteDetailsScreenTest {
         var left = false
         show(listOf(lottery(onWaitlist = true)), JoinState.ON_WAITLIST, onLeave = { left = true })
 
-        composeTestRule.onNodeWithTag("leaveButton_L1").performClick()
+        composeTestRule.onNodeWithTag("leaveButton_L1").performScrollTo().performClick()
         assertTrue(left)
     }
 
