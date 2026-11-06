@@ -4,7 +4,9 @@ import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -41,14 +43,31 @@ fun CampsiteRow(
                     shape = RoundedCornerShape(16.dp)
                 )
                 .statusBarsPadding()
-                .height(56.dp)
+                .height(110.dp)
                 .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = campsite.name,
-                fontSize = 30.sp,
-                modifier = Modifier
-            )
+            Column() {
+                Text(
+                    text = campsite.name,
+                    fontSize = 30.sp,
+                    modifier = Modifier
+                )
+                Text(
+                    text = "Location: " + campsite.location,
+                    fontSize = 15.sp,
+                    modifier = Modifier
+                )
+                Text(
+                    text = "Occupancy: " + campsite.occupancy,
+                    fontSize = 15.sp,
+                    modifier = Modifier
+                )
+                Text(
+                    text = "Rating: " + campsite.averageRating + "/5",
+                    fontSize = 15.sp,
+                    modifier = Modifier
+                )
+            }
         }
     }
 }
