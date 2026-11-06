@@ -42,7 +42,8 @@ class ProfileScreenTest {
                 onBack = {},
                 onDelete = {
                     deleteCalled = true
-                }
+                },
+                onViewPolicy = {}
             )
         }
     }
