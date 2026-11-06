@@ -69,8 +69,9 @@ fun Policy_GuidelinesScreen(onBack: () -> Unit) {
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
+                // The following text is from Deepseek, "give me an app policy and guidelines to paste in", 2026-11-05
                 text = """
-                    Welcome to CampLotto! Please read our guidelines and policies carefully before using the app.
+                    Please read our guidelines and policies carefully before using the app.
                     
                     --- GUIDELINES ---
                     
@@ -92,7 +93,7 @@ fun Policy_GuidelinesScreen(onBack: () -> Unit) {
                     Your location data is only used to show you campsites near you and to provide map locations for listings. It is never sold to third parties. Your profile information is stored securely to facilitate the lottery and reservation systems.
                     
                     6. Liability
-                    CampLotto is a platform connecting users. The app is not responsible for weather conditions, physical injuries, property damage, or any issues incurred during your stay. Please camp responsibly!
+                    This app is a platform connecting users. The app is not responsible for weather conditions, physical injuries, property damage, or any issues incurred during your stay. Please camp responsibly!
                 """.trimIndent(),
                 fontSize = 16.sp,
                 color = Color.White,
