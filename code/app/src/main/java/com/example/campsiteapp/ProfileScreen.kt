@@ -63,6 +63,7 @@ fun ProfileScreen(
     onSave: (String, String, String) -> Unit,
     onBack: () -> Unit,
     onDelete: () -> Unit,
+    onViewPolicy: () -> Unit,
     modifier: Modifier = Modifier,
     // This photo implementation was provided via Codex (2026-11-05):
     // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
@@ -333,6 +334,15 @@ fun ProfileScreen(
 
         }
 
+        TextButton(
+            onClick = { onViewPolicy() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            Text("View App Policy & Guidelines", color = CampGreen)
+        }
+
         Button(
             onClick = { showDeleteDialog = true },
             colors = ButtonDefaults.buttonColors(
@@ -421,7 +431,8 @@ fun ProfileScreenPreview() {
             phone = "780-555-0123",
             onSave = { _, _, _ -> },
             onBack = {},
-            onDelete = {}
+            onDelete = {},
+            onViewPolicy = {}
         )
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -40,20 +41,14 @@ fun BrowseProfilesScreen(
     onDeleteProfile: (Profile) -> Unit
 ) {
     var search by remember { mutableStateOf("") }
+    var selectedProfileId by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        Text(
-            text = "All Profiles",
-            color = Color.White,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0xFF006838))
-                .padding(16.dp)
-        )
+        ScreenHeader(title = "All Profiles", onBack = { navController.popBackStack() })
 
         TextField(
             value = search,
@@ -74,10 +69,34 @@ fun BrowseProfilesScreen(
                 ProfileRow(
                     profile = profile,
                     onDeleteProfile = onDeleteProfile,
-                    onViewProfile = { navController.navigate("") }
+                    onViewProfile = { selectedProfileId = it.uid }
                 )
             }
         }
+    }
+
+    val selectedProfile = profiles.firstOrNull { it.uid == selectedProfileId }
+    if (selectedProfile != null) {
+        AlertDialog(
+            onDismissRequest = { selectedProfileId = null },
+            title = { Text(selectedProfile.name.ifBlank { "Profile details" }) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ProfileAvatar(
+                        picture = selectedProfile.profilePicture,
+                        modifier = Modifier.size(64.dp)
+                    )
+                    Text("Roles: " + selectedProfile.roles.joinToString { it.name }.ifBlank { "None" })
+                    Text("Email: " + selectedProfile.email.ifBlank { "Not provided" })
+                    Text("Phone: " + selectedProfile.phoneNumber.ifBlank { "Not provided" })
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedProfileId = null }) {
+                    Text("Close")
+                }
+            }
+        )
     }
 }
 
@@ -177,8 +196,8 @@ fun BrowseProfilesPreview() {
 
     BrowseProfilesScreen(
         modifier = Modifier.fillMaxSize(),
-        navController = rememberNavController(),
         profiles = profiles,
+        navController = rememberNavController(),
         onDeleteProfile = {}
     )
 }
