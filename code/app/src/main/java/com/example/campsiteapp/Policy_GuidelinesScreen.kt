@@ -35,31 +35,35 @@ fun Policy_GuidelinesScreen(onBack: () -> Unit) {
             .fillMaxSize()
             .background(CampBackground)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(CampGreen)
-                .height(56.dp)
-        ) {
-            TextButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .testTag("backButton")
-            ) {
-                Text(text = "←", color = Color.White, fontSize = 22.sp)
-            }
-
-            Text(
-                text = "App Policy and Guidelines",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .testTag("screenTitle")
-            )
-        }
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .background(CampGreen)
+//                .height(56.dp)
+//        ) {
+//            TextButton(
+//                onClick = onBack,
+//                modifier = Modifier
+//                    .align(Alignment.CenterStart)
+//                    .testTag("backButton")
+//            ) {
+//                Text(text = "←", color = Color.White, fontSize = 22.sp)
+//            }
+//
+//            Text(
+//                text = "App Policy and Guidelines",
+//                color = Color.White,
+//                fontSize = 20.sp,
+//                fontWeight = FontWeight.Bold,
+//                modifier = Modifier
+//                    .align(Alignment.Center)
+//                    .testTag("screenTitle")
+//            )
+//        }
+        ScreenHeader(
+            title = "App Policy and Guidelines",
+            onBack = onBack
+        )
 
         // Scrollable text area for the policy
         Column(
