@@ -18,7 +18,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
     val lotteryRepo = remember { LotteryRepository() }
 
     NavHost(navController, startDestination = "welcome") {
-        composable("welcome") { WelcomeScreen( navController) }
+        composable("welcome") { WelcomeScreen(navController) }
         composable("dashboard") { DashboardScreen(navController) }
         composable("browseProfiles") {
             BrowseProfilesScreen(
@@ -42,7 +42,11 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                         profilesRepository.saveProfilePicture(profile, picture, onComplete)
                     },
                     onSave = { name, email, phone ->
-                        profile.updateProfileInformation(name = name, email = email, phoneNumber = phone)
+                        profile.updateProfileInformation(
+                            name = name,
+                            email = email,
+                            phoneNumber = phone
+                        )
                         // This photo implementation was provided via Codex (2026-11-05):
                         // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
                         profilesRepository.saveContactInformation(profile)
@@ -109,7 +113,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 )
             }
         }
-        composable ( "campsites" ) {
+        composable("campsites") {
             val profile = AppUser.profile
             if (profile != null) {
                 CampsiteScreen(
@@ -138,6 +142,9 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                         // For now, just print or pop back:
                         navController.navigate("campsiteDetails/${campsite.id}")
                     }
+                )
+            }
+        }
         composable("registerCampsite") {
             val profile = AppUser.profile
             if (profile != null) {
@@ -167,7 +174,10 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 val lottery = lotteryRepo.getLotteriesByOwner(profile.uid).lastOrNull()
                 val names = profilesRepository.profiles.associate { it.uid to it.name }
                 OwnerLotteryListScreen(
-                    entrants = if (lottery != null) lotteryRepo.waitlistEntries(lottery, names) else listOf(),
+                    entrants = if (lottery != null) lotteryRepo.waitlistEntries(
+                        lottery,
+                        names
+                    ) else listOf(),
                     capacity = lottery?.waitlistCapacity,
                     isDrawComplete = lottery?.drawn == true,
                     onBack = { navController.popBackStack() }
