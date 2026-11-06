@@ -130,20 +130,20 @@ fun CampsiteDetailsScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                Button(
-                    onClick = { },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = CampGreenLight,
-                        contentColor = Color.Black
-                    ),
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .testTag("lotteryButton")
-                ) {
-                    Text(
-                        text = "Enter Lottery"
-                    )
-                }
+//                Button(
+//                    onClick = { },
+//                    colors = ButtonDefaults.buttonColors(
+//                        containerColor = CampGreenLight,
+//                        contentColor = Color.Black
+//                    ),
+//                    modifier = Modifier
+//                        .padding(24.dp)
+//                        .testTag("lotteryButton")
+//                ) {
+//                    Text(
+//                        text = "Enter Lottery"
+//                    )
+//                }
                 Button(
                     onClick = { showRateFields = !showRateFields },
                     colors = ButtonDefaults.buttonColors(
