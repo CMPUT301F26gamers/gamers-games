@@ -64,8 +64,8 @@ fun DashboardScreen(
         // Admin features
         if (profile?.hasRole(Roles.ADMIN) == true) {
             DashboardButton("Profiles", navController, "browseProfiles")
-            DashboardButton("Images",  navController, "")
-            DashboardButton("Notification Logs", navController, "")
+//            DashboardButton("Images",  navController, "")
+//            DashboardButton("Notification Logs", navController, "")
         }
 
         Spacer(modifier = Modifier.weight(1f))
