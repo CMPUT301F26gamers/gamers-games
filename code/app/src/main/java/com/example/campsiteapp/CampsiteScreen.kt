@@ -1,5 +1,6 @@
 package com.example.campsiteapp
 
+import android.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -35,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,6 +54,7 @@ fun CampsiteScreen(
     onAddCampsite: (Campsite) -> Unit,
     onRemoveCampsite: (Campsite) -> Unit,
     onBack: () -> Unit,
+    isAdmin: Boolean,
     modifier: Modifier = Modifier
 ) {
     var newCampsiteName by remember { mutableStateOf("") }
@@ -58,9 +62,13 @@ fun CampsiteScreen(
     var showAddCampsiteFields by remember { mutableStateOf(false) }
     var showRemoveCampsiteFields by remember { mutableStateOf(false) }
     var searchBarText by remember { mutableStateOf("") }
+    var showFilters by remember { mutableStateOf(false) }
+    var filterGuests by remember { mutableStateOf("") }
+    var filterLocation by remember { mutableStateOf("") }
     val campsites = repository.campsites
     repository.searchQuery = searchBarText
-
+    repository.selectedLocation = filterLocation
+    repository.minGuests = filterGuests.toIntOrNull()?.coerceAtLeast(0) ?: 0
 
     Column(
         modifier = modifier
@@ -95,54 +103,114 @@ fun CampsiteScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextField(
-            value = searchBarText,
-            onValueChange = {
-                searchBarText = it
-            },
-            label = { Text("Search") },
-            colors = fieldColors(),
-            shape = RoundedCornerShape(8.dp),
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("searchBar")
-                .padding(horizontal = 16.dp)
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
+            horizontalArrangement = Arrangement.Start
         ) {
+            TextField(
+                value = searchBarText,
+                onValueChange = {
+                    searchBarText = it
+                },
+                label = { Text("Search") },
+                colors = fieldColors(),
+                shape = RoundedCornerShape(8.dp),
+                singleLine = true,
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("searchBar")
+                    .padding(horizontal = 8.dp)
+            )
             FloatingActionButton(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .testTag("addFieldButton"),
+                    .padding(horizontal = 8.dp)
+                    .testTag("addFilterButton"),
                 onClick = {
-                    showAddCampsiteFields = !showAddCampsiteFields
-                    showRemoveCampsiteFields = false
+                    showFilters = !showFilters
                 },
                 containerColor = CampGreen,
                 contentColor = Color.White
             ) {
-                Text("+")
+                Text("Filters")
             }
-            FloatingActionButton(
+        }
+
+        if (showFilters) {
+            Row(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .testTag("removeFieldButton"),
-                onClick = {
-                    showRemoveCampsiteFields = !showAddCampsiteFields
-                    showAddCampsiteFields = false
-                    if (showRemoveCampsiteFields) {
-                        newCampsiteName = ""
-                        newCampsiteId = ""
-                    }
-                },
-                containerColor = Color.Red,
-                contentColor = Color.White
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.Start
             ) {
-                Text("-")
+                TextField(
+                    value = filterLocation,
+                    onValueChange = {
+                        filterLocation = it
+                    },
+                    label = { Text("Location") },
+                    colors = fieldColors(),
+                    shape = RoundedCornerShape(8.dp),
+                    singleLine = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("locationFilter")
+                        .padding(horizontal = 8.dp)
+                )
+                TextField(
+                    value = filterGuests,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    ),
+                    onValueChange = {
+                        filterGuests = it
+                    },
+                    label = { Text("Min Guests") },
+                    colors = fieldColors(),
+                    shape = RoundedCornerShape(8.dp),
+                    singleLine = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("guestsFilter")
+                        .padding(horizontal = 8.dp)
+                )
+            }
+        }
+
+        if (isAdmin) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .testTag("addFieldButton"),
+                    onClick = {
+                        showAddCampsiteFields = !showAddCampsiteFields
+                        showRemoveCampsiteFields = false
+                    },
+                    containerColor = CampGreen,
+                    contentColor = Color.White
+                ) {
+                    Text("+")
+                }
+                FloatingActionButton(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .testTag("removeFieldButton"),
+                    onClick = {
+                        showRemoveCampsiteFields = !showAddCampsiteFields
+                        showAddCampsiteFields = false
+                        if (showRemoveCampsiteFields) {
+                            newCampsiteName = ""
+                            newCampsiteId = ""
+                        }
+                    },
+                    containerColor = Color.Red,
+                    contentColor = Color.White
+                ) {
+                    Text("-")
+                }
             }
         }
         if (showAddCampsiteFields) {
@@ -228,7 +296,8 @@ fun CampsiteScreenPreview() {
             repository = repo,
             onAddCampsite = { _ ->},
             onRemoveCampsite = { _ -> },
-            onBack = {}
+            onBack = {},
+            isAdmin = true
         )
     }
 }

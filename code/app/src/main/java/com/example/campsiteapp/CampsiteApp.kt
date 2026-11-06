@@ -107,5 +107,17 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 )
             }
         }
+        composable ( "campsites" ) {
+            val profile = AppUser.profile
+            if (profile != null) {
+                CampsiteScreen(
+                    repository = campsiteRepo,
+                    onAddCampsite = { campsiteRepo.addCampsite(it) },
+                    onRemoveCampsite = { campsiteRepo.removeCampsite(it) },
+                    onBack = { navController.popBackStack() },
+                    isAdmin = profile.hasRole(Roles.ADMIN)
+                )
+            }
+        }
     }
 }
