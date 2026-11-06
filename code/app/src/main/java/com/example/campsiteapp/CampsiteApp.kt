@@ -143,7 +143,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     onCampsiteClick = { campsite ->
                         // Navigate to details (you will need to make a route for this)
                         // For now, just print or pop back:
-                        navController.navigate("campsiteDetails/${campsite.id}")
+                        navController.navigate("ownerCampsiteDetails/${campsite.id}")
                     }
                 )
             }
@@ -184,6 +184,18 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     capacity = lottery?.waitlistCapacity,
                     isDrawComplete = lottery?.drawn == true,
                     onBack = { navController.popBackStack() }
+                )
+            }
+        }
+        composable("ownerCampsiteDetails/{campsiteID}") { backStackEntry ->
+            val campsite = campsiteRepo.get(backStackEntry.arguments?.getString("campsiteID"))
+            val profile = AppUser.profile
+            if (profile != null && campsite != null) {
+                OwnerCampsiteDetailsScreen(
+                    campsite = campsite,
+                    profile = profile,
+                    onBack = { navController.popBackStack() },
+                    onUpdateDetails = { old, new -> campsiteRepo.updateCampsite(old, new) }
                 )
             }
         }
