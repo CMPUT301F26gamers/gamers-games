@@ -89,8 +89,8 @@ class CreateLotteryViewModel(
      * Clears booking and stay, since they must come after registration.
      */
     fun setRegistrationPeriod(start: Date, end: Date) {
-        _registrationStart = startOfDay(start)
-        _registrationEnd = endOfDay(end)
+        _registrationStart = startOfPickedDay(start)
+        _registrationEnd = endOfPickedDay(end)
         _bookingStart = null
         _bookingEnd = null
         _stayStart = null
@@ -103,8 +103,8 @@ class CreateLotteryViewModel(
      * Clears the stay, since it must come after booking.
      */
     fun setBookingPeriod(start: Date, end: Date) {
-        _bookingStart = startOfDay(start)
-        _bookingEnd = endOfDay(end)
+        _bookingStart = startOfPickedDay(start)
+        _bookingEnd = endOfPickedDay(end)
         _stayStart = null
         _stayEnd = null
         _error = null
@@ -112,8 +112,8 @@ class CreateLotteryViewModel(
 
     /** Sets the stay period the campsites are listed for (US 02.04.01). */
     fun setStayPeriod(start: Date, end: Date) {
-        _stayStart = startOfDay(start)
-        _stayEnd = endOfDay(end)
+        _stayStart = startOfPickedDay(start)
+        _stayEnd = endOfPickedDay(end)
         _error = null
     }
 
@@ -187,39 +187,5 @@ class CreateLotteryViewModel(
     private fun fail(message: String) {
         _error = message
         _isSaving = false
-    }
-
-    /**
-     * The date picker returns UTC midnight of the tapped day, so the
-     * year/month/day are read in UTC and rebuilt in the local timezone.
-     * @return 00:00:00.000 local time of the picked day
-     */
-    private fun startOfDay(picked: Date): Date {
-        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { time = picked }
-        return Calendar.getInstance().apply {
-            clear()
-            set(
-                utc.get(Calendar.YEAR),
-                utc.get(Calendar.MONTH),
-                utc.get(Calendar.DAY_OF_MONTH),
-                0, 0, 0
-            )
-        }.time
-    }
-
-    /** @return 23:59:59.999 local time of the picked day */
-    private fun endOfDay(picked: Date): Date {
-        val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { time = picked }
-        val nextMidnight = Calendar.getInstance().apply {
-            clear()
-            // Calendar is lenient, so day + 1 rolls into the next month if needed
-            set(
-                utc.get(Calendar.YEAR),
-                utc.get(Calendar.MONTH),
-                utc.get(Calendar.DAY_OF_MONTH) + 1,
-                0, 0, 0
-            )
-        }
-        return Date(nextMidnight.timeInMillis - 1)
     }
 }

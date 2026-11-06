@@ -1,5 +1,6 @@
 package com.example.campsiteapp
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -54,7 +55,13 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
             if (profile != null) {
                 LaunchedEffect(Unit) {
                     campsiteRepo.addCampsite(
-                        Campsite(id = "test1", name = "Test Site", ownerId = profile.uid)
+                        Campsite(id = "1", name = "Camp A", ownerId = profile.uid)
+                    )
+                    campsiteRepo.addCampsite(
+                        Campsite(id = "2", name = "Camp B", ownerId = profile.uid)
+                    )
+                    campsiteRepo.addCampsite(
+                        Campsite(id = "3", name = "Camp C", ownerId = profile.uid)
                     )
                 }
                 val vm = remember { CreateLotteryViewModel(lotteryRepo) }
@@ -62,6 +69,31 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     onBack = { navController.popBackStack() },
                     onCreated = { navController.popBackStack() },
                     ownerId = profile.uid,
+                    campsites = campsiteRepo.getCampsitesByOwner(profile.uid),
+                    vm = vm
+                )
+            }
+        }
+        composable("ownerLotteries") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                LotteryListScreen(
+                    profile = profile,
+                    lotteryRepo = lotteryRepo,
+                    campsiteRepo = campsiteRepo,
+                    onEdit = { id -> navController.navigate("editLottery/$id") },
+                    onBack = { navController.popBackStack() },
+                )
+            }
+        }
+        composable("editLottery/{lotteryId}") { entry ->
+            val id = entry.arguments?.getString("lotteryId") ?: ""
+            val profile = AppUser.profile
+            if (profile != null) {
+                val vm = remember(id) { EditLotteryViewModel(lotteryRepo, id) }
+                EditLotteryScreen(
+                    onBack = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
                     campsites = campsiteRepo.getCampsitesByOwner(profile.uid),
                     vm = vm
                 )

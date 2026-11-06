@@ -42,66 +42,6 @@ class Lottery(
     val declined: MutableList<String> = mutableListOf()
 ) {
     /**
-     * Sets the stay period the campsites are listed for (US 02.04.01)
-     *
-     * @param start first day of the stay
-     * @param end last day of the stay
-     */
-    fun setLotteryPeriod(start: Date, end: Date, now: Date = Date()) {
-        if (start.before(startOfToday(now))) {
-            throw IllegalArgumentException("Start date cannot be in the past")
-        }
-        if (!start.before(end)) {
-            throw IllegalArgumentException("Start date must be before end date")
-        }
-        if (bookingEnd.after(start)) {
-            throw IllegalArgumentException("Stay must start after booking ends")
-        }
-        lotteryStart = start
-        lotteryEnd = end
-    }
-
-    /**
-     * Sets the period during which users can join the waitlist (US 02.04.03).
-     *
-     * @param start date of the registration period
-     * @param end date of the registration period
-     */
-    fun setRegistrationPeriod(start: Date, end: Date, now: Date = Date()) {
-        if (start.before(startOfToday(now))) {
-            throw IllegalArgumentException("Start date cannot be in the past")
-        }
-        if (!start.before(end)) {
-            throw IllegalArgumentException("Start date must be before end date")
-        }
-        if (end.after(bookingStart)) {
-            throw IllegalArgumentException("Registration must end before booking starts")
-        }
-        registrationStart = start
-        registrationEnd = end
-    }
-
-    /**
-     * Sets when winners can book or decline (US 02.04.04).
-     *
-     * @param start when winners are notified and can book
-     * @param end when the offer expires
-     */
-    fun setBookingPeriod(start: Date, end: Date) {
-        if (!start.before(end)) {
-            throw IllegalArgumentException("Start date must be before end date")
-        }
-        if (start.before(registrationEnd)) {
-            throw IllegalArgumentException("Booking must start after registration ends")
-        }
-        if (end.after(lotteryStart)) {
-            throw IllegalArgumentException("Booking must end before the stay starts")
-        }
-        bookingStart = start
-        bookingEnd = end
-    }
-
-    /**
      * Sets all three periods at once, validating the order:
      * registration -> booking -> stay (used when creating a lottery).
      * Booking may start right when registration ends (draw day).
@@ -215,20 +155,6 @@ class Lottery(
      */
     fun hasCampsite(campsiteId: String): Boolean {
         return campsiteIds.contains(campsiteId)
-    }
-
-    /**
-     * Adds a campsite to this lottery (US 02.04.02)
-     *
-     * @param campsiteId the campsite to add
-     * @return true if the campsite was added, false if it was already in the lottery
-     */
-    fun addCampsite(campsiteId: String): Boolean {
-        if (hasCampsite(campsiteId)) {
-            return false
-        }
-        campsiteIds.add(campsiteId)
-        return true
     }
 
     /** @return true if this user was drawn at some point (pending, booked or declined) */
