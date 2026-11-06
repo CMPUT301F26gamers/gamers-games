@@ -79,4 +79,10 @@ class CampsiteRepository : CampsiteRepo {
     override fun getCampsitesByOwner(ownerId: String): List<Campsite> {
         return _campsites.filter { it.ownerId == ownerId }
     }
+
+    fun updateCampsite(oldCampsite: Campsite, newCampsite: Campsite) {
+        campsitesRef.document(oldCampsite.id).set(newCampsite)
+            .addOnSuccessListener { println("Successfully updated document: ${oldCampsite.id}") }
+            .addOnFailureListener { e -> println("Failed to update document: ${e.message}") }
+    }
 }

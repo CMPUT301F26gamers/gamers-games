@@ -244,4 +244,37 @@ class CampsiteRepositoryTest {
         assertEquals("Pines Lake", results.first().name)
     }
 
+    @Test
+    fun updateCampsite_updatesCampsite() {
+        val testCampsite = Campsite(id = "site_10", name = "Cedar Woods", location = "Sector 10", date = Date(), numGuests = 2)
+        val updateCampsite = Campsite(id = "site_10", name = "Crimson Grove", location = "Sector 7", date = testCampsite.date, numGuests = 2)
+        val latch = CountDownLatch(1)
+
+        repository.addCampsite(testCampsite)
+        repository.updateCampsite(testCampsite, updateCampsite)
+
+        val registration = firestore.collection("campsites")
+            .addSnapshotListener { _, _ ->
+                val updatedSite = repository.campsites.find { it.id == "site_10" }
+                if (updatedSite != null && updatedSite.name == "Crimson Grove" && updatedSite.location == "Sector 7") {
+                    latch.countDown()
+                }
+            }
+        repository.updateCampsite(testCampsite, updateCampsite)
+
+        val reachedZero = latch.await(3, TimeUnit.SECONDS)
+
+        registration.remove()
+
+        assertTrue(
+            "SnapshotListener did not update campsite in time",
+            reachedZero
+        )
+
+        val result = repository.campsites.first { it.id == "site_10" }
+
+        assertEquals("Crimson Grove", result.name)
+        assertEquals("Sector 7", result.location)
+    }
+
 }
