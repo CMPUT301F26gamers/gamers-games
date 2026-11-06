@@ -203,9 +203,9 @@ fun CampsiteScreenPreview() {
     CampsiteAppTheme {
         CampsiteScreen(
             campsites = listOf(
-                Campsite("1", "Camp Melody"),
-                Campsite("2", "Bingus"),
-                Campsite("3", "Balls")
+                Campsite("1", "Camp Melody", "Edmonton", occupancy = 4, averageRating = 4.0),
+                Campsite("2", "Bingus", "Calgary", occupancy = 10, averageRating = 3.6),
+                Campsite("3", "Balls", "Metropolis", occupancy = 1, averageRating = 1.2)
             ),
             onAddCampsite = { _ ->},
             onRemoveCampsite = { _ -> },
