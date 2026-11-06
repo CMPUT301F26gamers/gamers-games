@@ -93,4 +93,46 @@ class OwnerLotteryListTest {
         composeTestRule.onNodeWithTag("backButton").performClick()
         assertTrue(backClicked)
     }
+
+    @Test
+    fun test_auto_drawn_lottery_shows_won_and_not_selected() {
+        val lottery = Lottery(id = "l1", registrationEnd = java.util.Date(0L))
+        lottery.waitlist.add("Alice")
+        lottery.waitlist.add("Bob")
+        lottery.drawAutomatically(java.util.Date())
+        val entrants = lottery.waitlist.map { WaitlistEntry(it, "-", lottery.entrantStatus(it)) }
+
+        composeTestRule.setContent {
+            OwnerLotteryListScreen(
+                entrants = entrants,
+                capacity = null,
+                isDrawComplete = lottery.drawn,
+                onBack = {}
+            )
+        }
+
+        composeTestRule.onNodeWithText("Won").assertExists()
+        composeTestRule.onNodeWithText("Not selected").assertExists()
+    }
+
+    @Test
+    fun test_lottery_not_drawn_yet_shows_no_results() {
+        val lottery = Lottery(id = "l1", registrationEnd = java.util.Date(Long.MAX_VALUE))
+        lottery.waitlist.add("Alice")
+        lottery.drawAutomatically(java.util.Date())
+        val entrants = lottery.waitlist.map { WaitlistEntry(it, "-", lottery.entrantStatus(it)) }
+
+        composeTestRule.setContent {
+            OwnerLotteryListScreen(
+                entrants = entrants,
+                capacity = null,
+                isDrawComplete = lottery.drawn,
+                onBack = {}
+            )
+        }
+
+        composeTestRule.onNodeWithText("Alice").assertExists()
+        composeTestRule.onNodeWithText("Won").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Not selected").assertDoesNotExist()
+    }
 }
