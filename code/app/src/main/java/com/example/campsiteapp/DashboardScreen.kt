@@ -55,6 +55,8 @@ fun DashboardScreen(
             if (profile?.hasRole(Roles.OWNER) == true) {
                 DashboardButton("Create Lottery", navController, "createLottery")
             }
+            DashboardButton("Register Campsite", navController, "registerCampsite")
+            DashboardButton("Lottery Waitlist", navController, "ownerWaitlist")
         }
 
         // Admin features

@@ -245,4 +245,105 @@ class LotteryTest {
         assertFalse(l.canLeave("u1"))
         assertTrue(l.hasEntrant("u1"))
     }
+
+    @Test
+    fun isDrawDue_onlyAfterRegistrationEndsAndNotDrawn() {
+        val l = lottery()
+
+        assertFalse(l.isDrawDue(date(5, 6, 2026)))
+        assertFalse(l.isDrawDue(date(9, 6, 2026)))
+        assertTrue(l.isDrawDue(afterClose))
+
+        l.drawn = true
+        assertFalse(l.isDrawDue(afterClose))
+    }
+
+    @Test
+    fun drawAutomatically_drawsNumWinnersAfterRegistrationEnds() {
+        val l = lottery()
+        listOf("u1", "u2", "u3", "u4").forEach { l.waitlist.add(it) }
+        l.updateNumWinners(2)
+
+        assertTrue(l.drawAutomatically(date(5, 6, 2026)).isEmpty())
+        assertFalse(l.drawn)
+
+        val drawn = l.drawAutomatically(afterClose)
+
+        assertEquals(2, drawn.size)
+        assertEquals(2, l.winners.size)
+        assertTrue(l.drawn)
+    }
+
+    @Test
+    fun drawAutomatically_onlyDrawsOnce() {
+        val l = lottery()
+        listOf("u1", "u2", "u3", "u4").forEach { l.waitlist.add(it) }
+
+        l.drawAutomatically(afterClose)
+        val second = l.drawAutomatically(date(11, 6, 2026))
+
+        assertTrue(second.isEmpty())
+        assertEquals(1, l.winners.size)
+    }
+
+    @Test
+    fun drawAutomatically_everyoneWinsIfFewerThanNumWinners() {
+        val l = lottery()
+        l.waitlist.add("u1")
+        l.updateNumWinners(3)
+
+        val drawn = l.drawAutomatically(afterClose)
+
+        assertEquals(listOf("u1"), drawn)
+        assertTrue(l.drawn)
+    }
+
+    @Test
+    fun drawAutomatically_emptyWaitlistStillMarksDrawn() {
+        val l = lottery()
+
+        assertTrue(l.drawAutomatically(afterClose).isEmpty())
+        assertTrue(l.drawn)
+        assertFalse(l.isDrawDue(afterClose))
+    }
+
+    @Test
+    fun drawAutomatically_sameLotteryGivesSameWinners() {
+        val l = Lottery(id = "l1", registrationEnd = date(9, 6, 2026))
+        val sameOnOtherDevice = Lottery(id = "l1", registrationEnd = date(9, 6, 2026))
+        listOf("u1", "u2", "u3", "u4", "u5").forEach {
+            l.waitlist.add(it)
+            sameOnOtherDevice.waitlist.add(it)
+        }
+        l.updateNumWinners(2)
+        sameOnOtherDevice.updateNumWinners(2)
+
+        assertEquals(l.drawAutomatically(afterClose), sameOnOtherDevice.drawAutomatically(date(12, 6, 2026)))
+    }
+
+    @Test
+    fun entrantStatus_pendingThenWonOrNotSelected() {
+        val l = lottery()
+        l.waitlist.add("u1")
+        l.waitlist.add("u2")
+
+        assertEquals("Pending", l.entrantStatus("u1"))
+
+        val winner = l.drawAutomatically(afterClose).first()
+        val loser = if (winner == "u1") "u2" else "u1"
+
+        assertEquals("Won", l.entrantStatus(winner))
+        assertEquals("Not selected", l.entrantStatus(loser))
+    }
+
+    @Test
+    fun entrantStatus_bookedAndDeclinedWinnersStillShowWon() {
+        val l = lottery()
+        l.waitlist.add("u1")
+        l.updateNumWinners(1)
+        l.drawAutomatically(afterClose)
+
+        assertTrue(l.book("u1", date(15, 6, 2026)))
+        assertEquals("Won", l.entrantStatus("u1"))
+    }
 }

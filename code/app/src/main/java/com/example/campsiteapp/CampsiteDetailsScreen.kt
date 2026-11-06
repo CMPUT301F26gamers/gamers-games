@@ -103,12 +103,12 @@ fun CampsiteDetailsScreen(
                     modifier = Modifier
                 )
                 Text(
-                    text = "Location: Edmonton",
+                    text = "Location: " + campsite.location,
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
                 Text(
-                    text = "Maximum Occupancy: 4",
+                    text = "Maximum Occupancy: " + campsite.numGuests,
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
@@ -118,10 +118,17 @@ fun CampsiteDetailsScreen(
                     modifier = Modifier
                 )
                 Text(
-                    text = "A beautiful campsite located right in the heart of Edmonton.",
+                    text = campsite.description,
                     fontSize = 30.sp,
-                    modifier = Modifier
+                    modifier = Modifier.testTag("descriptionText")
                 )
+                if (campsite.tags.isNotEmpty()) {
+                    Text(
+                        text = "Tags: " + campsite.tags.joinToString(", "),
+                        fontSize = 30.sp,
+                        modifier = Modifier.testTag("tagsText")
+                    )
+                }
             }
         }
         if (showUserFields) {

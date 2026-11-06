@@ -29,6 +29,26 @@ class LotteryRepository (
             snapshot?.documents
                 ?.mapNotNull { it.toObject(Lottery::class.java) }
                 ?.let { lotteries.addAll(it) }
+            drawDueLotteries(Date())
+        }
+    }
+
+    fun drawDueLotteries(now: Date, onDone: (Boolean) -> Unit = {}) {
+        for (lottery in lotteries) {
+            if (lottery.isDrawDue(now)) {
+                lottery.drawAutomatically(now)
+                save(lottery, onDone)
+            }
+        }
+    }
+
+    fun waitlistEntries(lottery: Lottery, names: Map<String, String>): List<WaitlistEntry> {
+        return lottery.waitlist.map { userId ->
+            WaitlistEntry(
+                name = names[userId] ?: userId,
+                joinDate = "-",
+                status = lottery.entrantStatus(userId)
+            )
         }
     }
 

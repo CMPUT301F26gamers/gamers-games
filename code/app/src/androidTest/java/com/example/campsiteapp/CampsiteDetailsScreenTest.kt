@@ -1,6 +1,8 @@
 package com.example.campsiteapp
 
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import org.junit.Before
@@ -18,7 +20,11 @@ class CampsiteDetailsScreenTest {
             CampsiteDetailsScreen(
                 campsite = Campsite(
                     "1",
-                    "Balls"
+                    "Balls",
+                    location = "Jasper, AB",
+                    numGuests = 6,
+                    description = "Fire pit and picnic table",
+                    tags = listOf("lakeside", "pet friendly")
                 ),
                 profile = Profile(
                     uid = "1"
@@ -45,5 +51,24 @@ class CampsiteDetailsScreenTest {
         composeTestRule
             .onNodeWithTag("rateButton")
             .performClick()
+    }
+
+    @Test
+    fun test_shows_campsite_details() {
+        composeTestRule
+            .onNodeWithText("Location: Jasper, AB")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithText("Maximum Occupancy: 6")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithTag("descriptionText")
+            .assertTextEquals("Fire pit and picnic table")
+
+        composeTestRule
+            .onNodeWithTag("tagsText")
+            .assertTextEquals("Tags: lakeside, pet friendly")
     }
 }

@@ -39,7 +39,8 @@ class Lottery(
     val waitlist: MutableList<String> = mutableListOf(),
     val winners: MutableList<String> = mutableListOf(),
     val bookings: MutableList<String> = mutableListOf(),
-    val declined: MutableList<String> = mutableListOf()
+    val declined: MutableList<String> = mutableListOf(),
+    var drawn: Boolean = false
 ) {
     /**
      * Sets the stay period the campsites are listed for (US 02.04.01)
@@ -256,6 +257,29 @@ class Lottery(
         val drawn = candidates.shuffled(Random(seed)).take(count)
         winners.addAll(drawn)
         return drawn
+    }
+
+    fun isDrawDue(now: Date): Boolean {
+        return !drawn && now.after(registrationEnd)
+    }
+
+    fun drawAutomatically(now: Date): List<String> {
+        if (!isDrawDue(now)) {
+            return listOf()
+        }
+        val drawnUsers = drawWinners(numWinners, id.hashCode().toLong(), now)
+        drawn = true
+        return drawnUsers
+    }
+
+    fun entrantStatus(userId: String): String {
+        if (!drawn) {
+            return "Pending"
+        }
+        if (hasBeenDrawn(userId)) {
+            return "Won"
+        }
+        return "Not selected"
     }
 
     /** @return true if winners can book or decline at the given time */
