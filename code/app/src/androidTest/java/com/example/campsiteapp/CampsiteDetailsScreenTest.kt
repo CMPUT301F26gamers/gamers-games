@@ -5,6 +5,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -70,5 +72,28 @@ class CampsiteDetailsScreenTest {
         composeTestRule
             .onNodeWithTag("tagsText")
             .assertTextEquals("Tags: lakeside, pet friendly")
+    }
+
+    @Test
+    fun addRating_computesAverageForTwoUsers() {
+
+        val campsite = Campsite()
+
+        campsite.addRating("user1", 4)
+        campsite.addRating("user2", 2)
+
+        assertEquals(3.0, campsite.averageRating)
+    }
+
+    @Test
+    fun addRating_replacesExistingUserRating() {
+
+        val campsite = Campsite()
+
+        campsite.addRating("user1", 5)
+        campsite.addRating("user1", 1)
+
+        assertEquals(1, campsite.ratings.size)
+        assertEquals(1.0, campsite.averageRating)
     }
 }
