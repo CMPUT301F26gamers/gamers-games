@@ -21,9 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -93,8 +95,18 @@ fun ProfileRow(
             .padding(8.dp)
             .background(Color.LightGray, RoundedCornerShape(8.dp))
             .clickable { onViewProfile(profile) }
-            .padding(12.dp)
+            .padding(12.dp),
+        // This photo implementation was provided via Codex (2026-11-05):
+        // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        // This photo implementation was provided via Codex (2026-11-05):
+        // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+        ProfileAvatar(
+            picture = profile.profilePicture,
+            modifier = Modifier.padding(end = 12.dp).size(40.dp)
+        )
+
         Column(
             modifier = Modifier.weight(1f)
         ) {
