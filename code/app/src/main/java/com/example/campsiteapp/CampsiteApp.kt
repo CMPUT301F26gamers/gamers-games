@@ -25,7 +25,9 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 modifier = modifier,
                 navController = navController,
                 profiles = profilesRepository.profiles,
-                onDeleteProfile = { profile -> profilesRepository.removeProfile(profile) }
+                onDeleteProfile = { profile ->
+                    profilesRepository.cascadeDeleteProfile(profile, campsiteRepo, lotteryRepo)
+                }
             )
         }
         composable("profile") {

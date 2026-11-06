@@ -41,6 +41,16 @@ class ProfileRepository(
         profilesRef.document(profile.uid).delete()
     }
 
+    fun cascadeDeleteProfile(profile: Profile, campsiteRepo: CampsiteRepo, lotteryRepo: LotteryRepository) {
+        for (campsite in campsiteRepo.getCampsitesByOwner(profile.uid)) {
+            for (lottery in lotteryRepo.getLotteries(campsite.id)) {
+                lotteryRepo.removeCampsite(lottery.id, campsite.id)
+            }
+            campsiteRepo.removeCampsite(campsite)
+        }
+        removeProfile(profile)
+    }
+
     fun deleteProfile(profile: Profile) {
         removeProfile(profile)
         _profiles.removeAll { it.uid == profile.uid }

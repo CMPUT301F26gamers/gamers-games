@@ -2,7 +2,6 @@ package com.example.campsiteapp
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -12,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.navigation.compose.rememberNavController
 import com.google.firebase.firestore.Blob
 import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertEquals
@@ -76,6 +76,16 @@ class BrowseProfilesScreenTest {
                 .fetchSemanticsNodes().size == 1
         }
         composeTestRule.onNodeWithContentDescription("Profile picture").assertIsDisplayed()
+    }
+
+    @Test
+    fun tappingProfileShowsSelectedDetailsAndCloseDismissesThem() {
+        composeTestRule.onNodeWithText("Jane D.").performClick()
+
+        composeTestRule.onNodeWithText("Email: JaneEmail").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Email: AlexEmail").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Close").performClick()
+        composeTestRule.onNodeWithText("Email: JaneEmail").assertDoesNotExist()
     }
 
     @Test
