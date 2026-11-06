@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -24,6 +25,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,13 +39,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.campsiteapp.ui.theme.CampBackground
+import com.example.campsiteapp.ui.theme.CampError
 import com.example.campsiteapp.ui.theme.CampGreen
 import com.example.campsiteapp.ui.theme.CampsiteAppTheme
+import java.util.Date
 import kotlin.compareTo
 
 @Composable
 fun CampsiteScreen(
-    campsites: List<Campsite>,
+    repository: CampsiteRepo,
     onAddCampsite: (Campsite) -> Unit,
     onRemoveCampsite: (Campsite) -> Unit,
     onBack: () -> Unit,
@@ -52,6 +57,10 @@ fun CampsiteScreen(
     var newCampsiteId by remember { mutableStateOf("") }
     var showAddCampsiteFields by remember { mutableStateOf(false) }
     var showRemoveCampsiteFields by remember { mutableStateOf(false) }
+    var searchBarText by remember { mutableStateOf("") }
+    val campsites = repository.campsites
+    repository.searchQuery = searchBarText
+
 
     Column(
         modifier = modifier
@@ -86,6 +95,21 @@ fun CampsiteScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        TextField(
+            value = searchBarText,
+            onValueChange = {
+                searchBarText = it
+            },
+            label = { Text("Search") },
+            colors = fieldColors(),
+            shape = RoundedCornerShape(8.dp),
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("searchBar")
+                .padding(horizontal = 16.dp)
+        )
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -97,11 +121,6 @@ fun CampsiteScreen(
                 onClick = {
                     showAddCampsiteFields = !showAddCampsiteFields
                     showRemoveCampsiteFields = false
-//                    if (showAddCampsiteFields) {
-//                        selectedCampsite = null
-//                        editedCityName = ""
-//                        editedProvinceName = ""
-//                    }
                 },
                 containerColor = CampGreen,
                 contentColor = Color.White
@@ -200,16 +219,40 @@ fun CampsiteScreen(
 @Preview(showBackground = true)
 @Composable
 fun CampsiteScreenPreview() {
+    val repo = CampsiteRepositoryStud()
+    repo.addCampsite(Campsite(name = "Camp Melody", id = "1"))
+    repo.addCampsite(Campsite(name = "Bingus", id = "2"))
+    repo.addCampsite(Campsite(name = "Balls", id = "3"))
     CampsiteAppTheme {
         CampsiteScreen(
-            campsites = listOf(
-                Campsite("1", "Camp Melody"),
-                Campsite("2", "Bingus"),
-                Campsite("3", "Balls")
-            ),
+            repository = repo,
             onAddCampsite = { _ ->},
             onRemoveCampsite = { _ -> },
             onBack = {}
         )
+    }
+}
+
+class CampsiteRepositoryStud : CampsiteRepo {
+    private val _campsites = mutableStateListOf<Campsite>()
+
+    override var searchQuery: String by mutableStateOf("")
+    override var minGuests: Int by mutableIntStateOf(0)
+    override var selectedLocation: String by mutableStateOf("")
+    override var selectedDate: Date by mutableStateOf(Date(0L))
+
+    override val campsites: List<Campsite>
+        get() = _campsites
+
+    override fun addCampsite(campsite: Campsite) {
+        _campsites.add(campsite)
+    }
+
+    override fun removeCampsite(campsite: Campsite) {
+        _campsites.remove(campsite)
+    }
+
+    override fun getCampsitesByOwner(ownerId: String): List<Campsite> {
+        return _campsites.filter { it.ownerId == ownerId }
     }
 }
