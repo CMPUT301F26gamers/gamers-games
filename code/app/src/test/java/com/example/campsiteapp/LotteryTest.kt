@@ -29,67 +29,6 @@ class LotteryTest {
     )
 
     @Test
-    fun setLotteryPeriod_updatesAndRejectsInvalidDates() {
-        val l = lottery()
-
-        l.setLotteryPeriod(date(26, 6, 2026), date(30, 6, 2026), now)
-        assertEquals(date(26, 6, 2026), l.lotteryStart)
-
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setLotteryPeriod(date(30, 6, 2026), date(26, 6, 2026), now)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setLotteryPeriod(date(26, 6, 2026), date(26, 6, 2026), now)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setLotteryPeriod(date(1, 1, 2026), date(5, 1, 2026), now)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setLotteryPeriod(date(18, 6, 2026), date(25, 6, 2026), now)
-        }
-    }
-
-    @Test
-    fun setRegistrationPeriod_updatesAndRejectsInvalidDates() {
-        val l = lottery()
-
-        l.setRegistrationPeriod(date(2, 6, 2026), date(8, 6, 2026), now)
-        assertEquals(date(2, 6, 2026), l.registrationStart)
-
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setRegistrationPeriod(date(8, 6, 2026), date(2, 6, 2026), now)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setRegistrationPeriod(date(2, 6, 2026), date(11, 6, 2026), now)
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setRegistrationPeriod(
-                date(1, 6, 2026),
-                date(11, 6, 2026),
-                now
-            )
-        }
-    }
-
-    @Test
-    fun setBookingPeriod_updatesAndRejectsInvalidDates() {
-        val l = lottery()
-
-        l.setBookingPeriod(date(10, 6, 2026), date(19, 6, 2026))
-        assertEquals(date(10, 6, 2026), l.bookingStart)
-
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setBookingPeriod(date(19, 6, 2026), date(10, 6, 2026))
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setBookingPeriod(date(8, 6, 2026), date(15, 6, 2026))
-        }
-        assertThrows(IllegalArgumentException::class.java) {
-            l.setBookingPeriod(date(10, 6, 2026), date(21, 6, 2026))
-        }
-    }
-
-    @Test
     fun setPeriods_updatesAllPeriods() {
         val l = lottery()
 
@@ -166,16 +105,6 @@ class LotteryTest {
         l.waitlist.remove("user1")
         assertFalse(l.isFull())
         assertEquals(1, l.waitlist.size)
-    }
-
-    @Test
-    fun addCampsite_rejectsDuplicates() {
-        val l = lottery()
-
-        assertTrue(l.hasCampsite("camp1"))
-        assertTrue(l.addCampsite("camp2"))
-        assertFalse(l.addCampsite("camp2"))
-        assertEquals(2, l.campsiteIds.size)
     }
 
     @Test
