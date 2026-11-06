@@ -1,13 +1,19 @@
 package com.example.campsiteapp
 
+import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.firebase.firestore.Blob
+import java.io.ByteArrayOutputStream
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -48,6 +54,28 @@ class BrowseProfilesScreenTest {
         composeTestRule.onNodeWithText("Jane D.").assertExists()
         composeTestRule.onNodeWithText("Sam K.").assertExists()
         composeTestRule.onNodeWithText("Mark T.").assertExists()
+    }
+
+    // This photo implementation was provided via Codex (2026-11-05):
+    // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+    @Test
+    fun testSavedProfilePictureIsDisplayed() {
+        val bitmap = Bitmap.createBitmap(8, 8, Bitmap.Config.ARGB_8888)
+        val bytes = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 85, bytes)
+        bitmap.recycle()
+        val picture = Blob.fromBytes(bytes.toByteArray())
+
+        composeTestRule.onNodeWithContentDescription("Profile picture").assertDoesNotExist()
+        composeTestRule.runOnIdle {
+            testingProfiles[0] = Profile(uid = "1", name = "Alex P.", profilePicture = picture)
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule.onAllNodesWithContentDescription("Profile picture")
+                .fetchSemanticsNodes().size == 1
+        }
+        composeTestRule.onNodeWithContentDescription("Profile picture").assertIsDisplayed()
     }
 
     @Test
