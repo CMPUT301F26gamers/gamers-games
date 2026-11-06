@@ -9,16 +9,16 @@ import kotlinx.coroutines.tasks.await
 import java.util.Calendar
 import java.util.Date
 
-class CampsiteRepository {
+class CampsiteRepository : CampsiteRepo {
     private val db = Firebase.firestore
     private val campsitesRef = db.collection("campsites")
     private val _campsites = mutableStateListOf<Campsite>()
 
     val NO_DATE_SELECTED = Date(0L)
-    var searchQuery: String = ""
-    var minGuests: Int = 0
-    var selectedLocation: String = ""
-    var selectedDate: Date by mutableStateOf(NO_DATE_SELECTED)
+    override var searchQuery: String = ""
+    override var minGuests: Int = 0
+    override var selectedLocation: String = ""
+    override var selectedDate: Date by mutableStateOf(NO_DATE_SELECTED)
 
     init {
         campsitesRef.addSnapshotListener { snapshot, error ->
@@ -37,7 +37,7 @@ class CampsiteRepository {
         }
     }
 
-    val campsites: List<Campsite>
+    override val campsites: List<Campsite>
         get() = _campsites.filter { campsite ->
             // Match Search Query (if provided)
             val matchesQuery = searchQuery.isBlank() ||
@@ -66,17 +66,17 @@ class CampsiteRepository {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)
     }
 
-    fun addCampsite(campsite: Campsite) {
+    override fun addCampsite(campsite: Campsite) {
         campsitesRef.document(campsite.id).set(campsite)
     }
 
-    fun removeCampsite(campsite: Campsite) {
+    override fun removeCampsite(campsite: Campsite) {
         campsitesRef.document(campsite.id).delete()
             .addOnSuccessListener { println("Successfully deleted document: ${campsite.id}") }
             .addOnFailureListener { e -> println("Failed to delete document: ${e.message}") }
     }
 
-    fun getCampsitesByOwner(ownerId: String): List<Campsite> {
+    override fun getCampsitesByOwner(ownerId: String): List<Campsite> {
         return _campsites.filter { it.ownerId == ownerId }
     }
 }
