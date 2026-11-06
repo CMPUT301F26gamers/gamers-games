@@ -54,6 +54,7 @@ fun DashboardScreen(
         if (profile?.hasRole(Roles.OWNER) == true) {
             if (profile?.hasRole(Roles.OWNER) == true) {
                 DashboardButton("Create Lottery", navController, "createLottery")
+                DashboardButton("My Lotteries", navController, "ownerLotteries")
             }
         }
 

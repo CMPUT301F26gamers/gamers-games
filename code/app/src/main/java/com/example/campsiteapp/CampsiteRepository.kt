@@ -72,6 +72,8 @@ class CampsiteRepository : CampsiteRepo {
 
     override fun removeCampsite(campsite: Campsite) {
         campsitesRef.document(campsite.id).delete()
+            .addOnSuccessListener { println("Successfully deleted document: ${campsite.id}") }
+            .addOnFailureListener { e -> println("Failed to delete document: ${e.message}") }
     }
 
     override fun getCampsitesByOwner(ownerId: String): List<Campsite> {
