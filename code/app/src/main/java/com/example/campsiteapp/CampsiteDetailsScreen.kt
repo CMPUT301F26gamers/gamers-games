@@ -103,22 +103,22 @@ fun CampsiteDetailsScreen(
                     modifier = Modifier
                 )
                 Text(
-                    text = "Location: Edmonton",
+                    text = "Location: " + campsite.location,
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
                 Text(
-                    text = "Maximum Occupancy: 4",
+                    text = "Maximum Occupancy: " + campsite.occupancy,
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
                 Text(
-                    text = "Rating: 4/5",
+                    text = "Rating: " + campsite.averageRating + "/5",
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
                 Text(
-                    text = "A beautiful campsite located right in the heart of Edmonton.",
+                    text = campsite.description,
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
@@ -182,7 +182,11 @@ fun CampsiteDetailsScreenPreview() {
         CampsiteDetailsScreen(
             campsite = Campsite(
                 "1",
-                "Balls"
+                "Balls",
+                "Edmonton",
+                occupancy = 4,
+                description = "A beautiful campsite in the heart of Edmonton.",
+                averageRating = 4.0
             ),
             profile = Profile(
                 uid = "1"

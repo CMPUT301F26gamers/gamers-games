@@ -46,4 +46,5 @@ class CampsiteDetailsScreenTest {
             .onNodeWithTag("rateButton")
             .performClick()
     }
+
 }
