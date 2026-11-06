@@ -42,7 +42,7 @@ fun DashboardScreen(
         )
 
         // Common features
-        DashboardButton("Campsites", navController, "")
+        DashboardButton("Campsites", navController, "campsites")
         DashboardButton("My Profile", navController, "profile")
 
         // Entrant features

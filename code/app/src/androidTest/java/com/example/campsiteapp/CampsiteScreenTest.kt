@@ -28,7 +28,8 @@ class CampsiteScreenTest {
                 repository = campsiteRepo,
                 onAddCampsite = { campsiteRepo.addCampsite(it) },
                 onRemoveCampsite = { campsiteRepo.removeCampsite(it) },
-                onBack = {}
+                onBack = {},
+                isAdmin = true
             )
         }
     }
