@@ -198,4 +198,84 @@ class LotteryRepositoryTest {
         repo.removeLottery("badId") { result = it }
         assertEquals(false, result)
     }
+
+    @Test
+    fun drawDueLotteriesDrawsAndSavesClosedLottery() {
+        val l = addLottery("l1", listOf("camp1"))
+        l.waitlist.addAll(listOf("u1", "u2", "u3"))
+        l.updateNumWinners(2)
+
+        repo.drawDueLotteries(afterReg)
+
+        assertTrue(l.drawn)
+        assertEquals(2, l.winners.size)
+        verify { ref.document("l1").set(l) }
+    }
+
+    @Test
+    fun drawDueLotteriesSkipsLotteryStillInRegistration() {
+        val l = addLottery("l1", listOf("camp1"))
+        l.waitlist.add("u1")
+
+        repo.drawDueLotteries(inReg)
+
+        assertFalse(l.drawn)
+        assertTrue(l.winners.isEmpty())
+        verify(exactly = 0) { ref.document("l1") }
+    }
+
+    @Test
+    fun drawDueLotteriesSkipsAlreadyDrawnLottery() {
+        val l = addLottery("l1", listOf("camp1"))
+        l.waitlist.add("u1")
+        l.drawn = true
+
+        repo.drawDueLotteries(afterReg)
+
+        assertTrue(l.winners.isEmpty())
+        verify(exactly = 0) { ref.document("l1") }
+    }
+
+    @Test
+    fun drawDueLotteriesOnlyDrawsTheClosedOnes() {
+        val closed = addLottery("l1", listOf("camp1"))
+        closed.waitlist.add("u1")
+        val drawnAlready = addLottery("l2", listOf("camp2"))
+        drawnAlready.waitlist.add("u2")
+        drawnAlready.drawn = true
+
+        repo.drawDueLotteries(afterReg)
+
+        assertEquals(listOf("u1"), closed.winners)
+        assertTrue(drawnAlready.winners.isEmpty())
+        verify { ref.document("l1") }
+        verify(exactly = 0) { ref.document("l2") }
+    }
+
+    @Test
+    fun waitlistEntriesShowNamesAndStatus() {
+        val l = addLottery("l1", listOf("camp1"))
+        l.waitlist.addAll(listOf("u1", "u2"))
+        l.updateNumWinners(1)
+
+        val before = repo.waitlistEntries(l, mapOf("u1" to "Alice", "u2" to "Bob"))
+        assertEquals(listOf("Alice", "Bob"), before.map { it.name })
+        assertTrue(before.all { it.status == "Pending" })
+
+        repo.drawDueLotteries(afterReg)
+        val after = repo.waitlistEntries(l, mapOf("u1" to "Alice", "u2" to "Bob"))
+
+        assertEquals(1, after.count { it.status == "Won" })
+        assertEquals(1, after.count { it.status == "Not selected" })
+    }
+
+    @Test
+    fun waitlistEntriesFallBackToUserIdWithoutName() {
+        val l = addLottery("l1", listOf("camp1"))
+        l.waitlist.add("u9")
+
+        val entries = repo.waitlistEntries(l, mapOf())
+
+        assertEquals("u9", entries.first().name)
+    }
 }

@@ -8,6 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.compose.ui.Modifier
+import java.util.UUID
 
 @Composable
 fun CampSiteApp(modifier: Modifier = Modifier) {
@@ -116,6 +117,42 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     onRemoveCampsite = { campsiteRepo.removeCampsite(it) },
                     onBack = { navController.popBackStack() },
                     isAdmin = profile.hasRole(Roles.ADMIN)
+                )
+            }
+        }
+        composable("registerCampsite") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                RegisterCampsiteScreen(
+                    onRegister = { name, location, maxGuests, description, tags ->
+                        campsiteRepo.addCampsite(
+                            Campsite(
+                                id = UUID.randomUUID().toString(),
+                                name = name,
+                                location = location,
+                                numGuests = maxGuests,
+                                occupancy = maxGuests,
+                                ownerId = profile.uid,
+                                description = description,
+                                tags = tags
+                            )
+                        )
+                        navController.popBackStack()
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
+        composable("ownerWaitlist") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                val lottery = lotteryRepo.getLotteriesByOwner(profile.uid).lastOrNull()
+                val names = profilesRepository.profiles.associate { it.uid to it.name }
+                OwnerLotteryListScreen(
+                    entrants = if (lottery != null) lotteryRepo.waitlistEntries(lottery, names) else listOf(),
+                    capacity = lottery?.waitlistCapacity,
+                    isDrawComplete = lottery?.drawn == true,
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

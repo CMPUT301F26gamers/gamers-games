@@ -56,6 +56,8 @@ fun DashboardScreen(
                 DashboardButton("Create Lottery", navController, "createLottery")
                 DashboardButton("My Lotteries", navController, "ownerLotteries")
             }
+            DashboardButton("Register Campsite", navController, "registerCampsite")
+            DashboardButton("Lottery Waitlist", navController, "ownerWaitlist")
         }
 
         // Admin features
