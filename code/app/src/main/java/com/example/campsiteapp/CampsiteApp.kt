@@ -54,7 +54,8 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                                 inclusive = true
                             }
                         }
-                    }
+                    },
+                    onViewPolicy = { navController.navigate("policy") }
                 )
             }
         }
@@ -116,6 +117,25 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     onRemoveCampsite = { campsiteRepo.removeCampsite(it) },
                     onBack = { navController.popBackStack() },
                     isAdmin = profile.hasRole(Roles.ADMIN)
+                )
+            }
+        }
+        composable("policy") {
+            Policy_GuidelinesScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable("ownerCampsites") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                OwnerCampsitesScreen(
+                    campsites = campsiteRepo.getCampsitesByOwner(profile.uid),
+                    onBack = { navController.popBackStack() },
+                    onCampsiteClick = { campsite ->
+                        // Navigate to details (you will need to make a route for this)
+                        // For now, just print or pop back:
+                        navController.navigate("campsiteDetails/${campsite.id}")
+                    }
                 )
             }
         }

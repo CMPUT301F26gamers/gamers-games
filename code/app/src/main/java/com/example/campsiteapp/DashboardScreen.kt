@@ -53,6 +53,7 @@ fun DashboardScreen(
         // Owner features
         if (profile?.hasRole(Roles.OWNER) == true) {
             if (profile?.hasRole(Roles.OWNER) == true) {
+                DashboardButton("My Campsites", navController, "ownerCampsites")
                 DashboardButton("Create Lottery", navController, "createLottery")
                 DashboardButton("My Lotteries", navController, "ownerLotteries")
             }
