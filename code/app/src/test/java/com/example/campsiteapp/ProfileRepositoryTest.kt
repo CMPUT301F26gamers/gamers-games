@@ -1,7 +1,13 @@
 package com.example.campsiteapp
 
+import com.google.android.gms.tasks.OnFailureListener
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.CollectionReference
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.*
@@ -15,6 +21,49 @@ class ProfileRepositoryTest {
     @After
     fun tearDown() {
         AppUser.profile = null
+    }
+
+    // This photo implementation was provided via Codex (2026-11-05):
+    // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+    @Test
+    fun saveProfilePictureUpdatesTheProfileAfterFirestoreConfirms() {
+        val profile = Profile("u1")
+        val picture = mockk<Blob>()
+        val write = mockk<Task<Void>>(relaxed = true)
+        val success = slot<OnSuccessListener<Void>>()
+        every { ref.document("u1").update("profilePicture", picture) } returns write
+        every { write.addOnSuccessListener(capture(success)) } returns write
+        var saved: Boolean? = null
+
+        repo.saveProfilePicture(profile, picture) { saved = it }
+
+        assertNull(profile.profilePicture)
+        assertNull(saved)
+        success.captured.onSuccess(null)
+
+        assertSame(picture, profile.profilePicture)
+        assertEquals(true, saved)
+    }
+
+    // This photo implementation was provided via Codex (2026-11-05):
+    // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
+    @Test
+    fun failedPhotoSaveKeepsThePreviousPicture() {
+        val previous = mockk<Blob>()
+        val profile = Profile("u1", profilePicture = previous)
+        val replacement = mockk<Blob>()
+        val write = mockk<Task<Void>>(relaxed = true)
+        val failure = slot<OnFailureListener>()
+        every { ref.document("u1").update("profilePicture", replacement) } returns write
+        every { write.addOnSuccessListener(any()) } returns write
+        every { write.addOnFailureListener(capture(failure)) } returns write
+        var saved: Boolean? = null
+
+        repo.saveProfilePicture(profile, replacement) { saved = it }
+        failure.captured.onFailure(IllegalStateException("Write failed"))
+
+        assertSame(previous, profile.profilePicture)
+        assertEquals(false, saved)
     }
 
     @Test
