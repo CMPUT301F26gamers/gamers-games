@@ -1,7 +1,6 @@
 package com.example.campsiteapp
 
 import androidx.compose.runtime.mutableStateListOf
-import com.example.campsiteapp.AppUser.profile
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FieldValue
