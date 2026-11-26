@@ -139,6 +139,17 @@ class ProfileRepository(
         }
     }
 
+    /**
+     * Saves the user's notification preference to Firestore.
+     *
+     * @param profile The profile whose preference is being updated.
+     * @param enableNotifications The new preference state (true to receive, false to opt out).
+     */
+    fun saveNotificationPreference(profile: Profile, enableNotifications: Boolean) {
+        profile.enableNotifications = enableNotifications
+        profilesRef.document(profile.uid).update("enableNotifications", enableNotifications)
+    }
+
     init {
         profilesRef.addSnapshotListener { snapshot, error ->
             if (error != null) {

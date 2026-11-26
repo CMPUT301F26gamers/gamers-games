@@ -1,5 +1,9 @@
 package com.example.campsiteapp
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -28,11 +32,20 @@ class ProfileScreenTest {
 
     @Before
     fun setUp() {
+
         composeTestRule.setContent {
+            var currentNotificationState by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(true)
+            }
+
             ProfileScreen(
                 name = "Alex P.",
                 email = "alex@example.com",
                 phone = "780-555-0123",
+                enableNotifications = currentNotificationState,
+                onToggleNotifications = { isChecked ->
+                    currentNotificationState = isChecked
+                },
                 onSave = { name, email, phone ->
                     saveCalled = true
                     savedName = name
@@ -233,5 +246,18 @@ class ProfileScreenTest {
 
         composeTestRule.runOnIdle { assertTrue(deleteCalled) }
         assertFalse(saveCalled)
+    }
+
+    @Test
+    fun notificationToggle_togglesStateAndCallsCallback() {
+
+        composeTestRule.onNodeWithTag("notificationToggle")
+            .assertIsOn()
+
+        composeTestRule.onNodeWithTag("notificationToggle")
+            .performClick()
+
+        composeTestRule.onNodeWithTag("notificationToggle")
+            .assertIsOff()
     }
 }
