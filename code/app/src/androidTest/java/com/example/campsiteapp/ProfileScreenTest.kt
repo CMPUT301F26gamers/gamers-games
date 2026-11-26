@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -96,6 +97,7 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertTrue(saveCalled)
@@ -120,12 +122,14 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertFalse(saveCalled)
 
         composeTestRule
             .onNodeWithText("Enter a valid email")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -145,12 +149,14 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertFalse(saveCalled)
 
         composeTestRule
             .onNodeWithText("Enter a valid phone number")
+            .performScrollTo()
             .assertExists()
     }
 
@@ -162,12 +168,14 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertFalse(saveCalled)
 
         composeTestRule
             .onNodeWithText("Name can't be empty")
+            .performScrollTo()
             .assertExists()
     }
 
