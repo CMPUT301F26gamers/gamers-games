@@ -21,6 +21,14 @@ import com.example.campsiteapp.ui.theme.CampGreen
 import com.example.campsiteapp.ui.theme.CampLabelGrey
 import java.util.Date
 
+/**
+ * Screen where a campsite owner edits an existing lottery
+ *
+ * uses the same form as [CreateLotteryScreen]
+ * prefilled from the saved lottery: campsites,
+ * number of winners, waitlist capacity and the three periods.
+ * All logic in viewmodel [vm]
+ */
 @Composable
 fun EditLotteryScreen(
     onBack: () -> Unit,
