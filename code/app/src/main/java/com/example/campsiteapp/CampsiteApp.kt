@@ -30,6 +30,16 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 }
             )
         }
+        composable("browseImages") {
+            BrowseImagesScreen(
+                modifier = modifier,
+                navController = navController,
+                profiles = profilesRepository.profiles,
+                onDeleteImage = { profile, _ ->
+                    profilesRepository.removeProfilePicture(profile) { }
+                }
+            )
+        }
         composable("profile") {
             val profile = AppUser.profile
             if (profile != null) {
