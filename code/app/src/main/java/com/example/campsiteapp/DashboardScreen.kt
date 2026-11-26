@@ -47,7 +47,9 @@ fun DashboardScreen(
 
         // Entrant features
         if (profile?.hasRole(Roles.ENTRANT) == true) {
-            // Add entrant-specific buttons here
+            if (profile?.hasRole(Roles.ENTRANT) == true) {
+                DashboardButton("Pending Reservations", navController, "pendingReservations")
+            }
         }
 
         // Owner features
@@ -87,7 +89,7 @@ fun DashboardButton(
     nextPage: String
 ) {
     Button(
-        onClick = {navController.navigate(nextPage)} ,
+        onClick = { navController.navigate(nextPage) { launchSingleTop = true } },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.LightGray,
             contentColor = Color.Black

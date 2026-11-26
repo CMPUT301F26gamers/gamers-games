@@ -16,6 +16,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
     val profilesRepository = remember { ProfileRepository() }
     val campsiteRepo = remember { CampsiteRepository() }
     val lotteryRepo = remember { LotteryRepository() }
+    val reservationRepo = remember { ReservationRepository() }
 
     NavHost(navController, startDestination = "welcome") {
         composable("welcome") { WelcomeScreen(navController) }
@@ -29,6 +30,34 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     profilesRepository.cascadeDeleteProfile(profile, campsiteRepo, lotteryRepo)
                 }
             )
+        }
+        composable("pendingReservations") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                PendingReservationsScreen(
+                    userId = profile.uid,
+                    lotteryRepo = lotteryRepo,
+                    campsiteRepo = campsiteRepo,
+                    onPick = { lotteryId, campsiteId -> navController.navigate("reserve/$lotteryId/$campsiteId") },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
+        composable("reserve/{lotteryId}/{campsiteId}") { entry ->
+            val profile = AppUser.profile
+            val lottery = lotteryRepo.findLottery(entry.arguments?.getString("lotteryId") ?: "")
+            val campsite = campsiteRepo.get(entry.arguments?.getString("campsiteId"))
+            if (profile != null && lottery != null && campsite != null) {
+                ReservationScreen(
+                    lottery = lottery,
+                    campsite = campsite,
+                    userId = profile.uid,
+                    reservationRepo = reservationRepo,
+                    lotteryRepo = lotteryRepo,
+                    onFinished = { navController.popBackStack() },
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
         composable("profile") {
             val profile = AppUser.profile
