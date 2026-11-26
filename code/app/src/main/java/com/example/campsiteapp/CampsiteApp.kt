@@ -43,6 +43,16 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 )
             }
         }
+        composable("browseImages") {
+            BrowseImagesScreen(
+                modifier = modifier,
+                navController = navController,
+                profiles = profilesRepository.profiles,
+                onDeleteImage = { profile, _ ->
+                    profilesRepository.removeProfilePicture(profile) { }
+                }
+            )
+        }
         composable("reserve/{lotteryId}/{campsiteId}") { entry ->
             val profile = AppUser.profile
             val lottery = lotteryRepo.findLottery(entry.arguments?.getString("lotteryId") ?: "")
