@@ -35,6 +35,12 @@ import com.example.campsiteapp.ui.theme.CampFieldGrey
 import com.example.campsiteapp.ui.theme.CampGreen
 import com.example.campsiteapp.ui.theme.CampGreenLight
 import com.example.campsiteapp.ui.theme.CampsiteAppTheme
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun OwnerCampsiteDetailsScreen(
@@ -55,6 +61,7 @@ fun OwnerCampsiteDetailsScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CampBackground)
+            .verticalScroll(rememberScrollState())
     ) {
         Box(
             modifier = Modifier
@@ -129,6 +136,39 @@ fun OwnerCampsiteDetailsScreen(
                     fontSize = 30.sp,
                     modifier = Modifier
                         .testTag("campsiteDescription")
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val qrBitmap = remember(campsite.id) { generateQRCode(campsite.id) }
+
+        if (qrBitmap != null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Campsite QR Code",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Image(
+                    bitmap = qrBitmap.asImageBitmap(),
+                    contentDescription = "Campsite QR Code",
+                    modifier = Modifier
+                        .size(200.dp)
+                        .background(Color.White, RoundedCornerShape(8.dp))
+                        .padding(8.dp)
+                        .testTag("campsiteQrCodeImage"),
+                    contentScale = ContentScale.Fit
                 )
             }
         }

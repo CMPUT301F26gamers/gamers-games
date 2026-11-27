@@ -1,13 +1,16 @@
 package com.example.campsiteapp
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import androidx.compose.ui.test.performScrollTo
 
 
 class OwnerCampsiteDetailsScreenTest {
@@ -36,14 +39,17 @@ class OwnerCampsiteDetailsScreenTest {
     fun test_owner_details_buttons() {
         composeTestRule
             .onNodeWithTag("editButton")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
             .onNodeWithTag("editButton")
+            .performScrollTo()
             .performClick()
 
         composeTestRule
             .onNodeWithTag("newName")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -52,6 +58,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("newLocation")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -60,6 +67,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("newOccupancy")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -68,6 +76,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("newDescription")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -76,10 +85,12 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("confirmButton")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
             .onNodeWithTag("confirmButton")
+            .performScrollTo()
             .performClick()
 
         composeTestRule.waitForIdle()
@@ -90,6 +101,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteName")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -98,6 +110,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteLocation")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -106,6 +119,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteOccupancy")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -114,10 +128,23 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteDescription")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
             .onNodeWithTag("campsiteDescription")
             .assertTextEquals("Yapping yapping...")
+    }
+
+    @Test
+    fun qrCode_isDisplayedForCampsite() {
+        composeTestRule
+            .onNodeWithText("Campsite QR Code")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithTag("campsiteQrCodeImage")
+            .assertExists()
+            .assertIsDisplayed()
     }
 }
