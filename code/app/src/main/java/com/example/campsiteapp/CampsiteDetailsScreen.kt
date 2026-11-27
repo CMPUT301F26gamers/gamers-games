@@ -50,9 +50,11 @@ fun CampsiteDetailsScreen(
     joinStateOf: (Lottery) -> JoinState,
     onJoin: (Lottery, (Boolean) -> Unit) -> Unit,
     onLeave: (Lottery, (Boolean) -> Unit) -> Unit,
+    onCampsiteUpdated: (Campsite) -> Unit = {},
     modifier: Modifier = Modifier,
     onBack: () -> Unit
 ) {
+    var currentCampsite by remember(campsite) { mutableStateOf(campsite) }
     var showUserFields by remember { mutableStateOf(false) }
     var showRateFields by remember { mutableStateOf(false) }
     var rating by remember { mutableStateOf("") }
@@ -81,7 +83,7 @@ fun CampsiteDetailsScreen(
                     shape = RoundedCornerShape(16.dp)
                 )
                 .statusBarsPadding()
-                .height(300.dp)
+                .height(330.dp)
                 .padding(horizontal = 16.dp)
         ) {
             Column(
@@ -108,7 +110,7 @@ fun CampsiteDetailsScreen(
                     modifier = Modifier
                 )
                 Text(
-                    text = "Rating: " + campsite.averageRating + "/5",
+                    text = "Rating: " + currentCampsite.averageRating + "/5",
                     fontSize = 30.sp,
                     modifier = Modifier
                 )
@@ -123,6 +125,17 @@ fun CampsiteDetailsScreen(
                         fontSize = 30.sp,
                         modifier = Modifier.testTag("tagsText")
                     )
+                }
+                Button(
+                    onClick = { showRateFields = !showRateFields }, // TODO: make this switch to the ratings screen
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CampGreen,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .testTag("ratingsButton")
+                ) {
+                    Text(text = "Ratings")
                 }
             }
         }
@@ -226,10 +239,30 @@ fun CampsiteDetailsScreen(
                 )
                 Button(
                     onClick = {
-                        if (rating.isNotBlank()) {
-                            campsite.addRating(profile.uid, rating = rating.toInt(), review = review)
-                            showRateFields = !showRateFields
+                        val parsedRating = rating.toIntOrNull()
+                        if (parsedRating == null || parsedRating !in 1..5) {
+                            say("Enter a rating between 1 and 5")
+                            return@Button
                         }
+
+                        val newRating = Rating(
+                            userID = profile.uid,
+                            rating = parsedRating,
+                            review = review.trim()
+                        )
+                        val updatedRatings = currentCampsite.ratings
+                            .filterNot { it.userID == profile.uid } + newRating
+                        val newAverage = updatedRatings.sumOf { it.rating }.toDouble() / updatedRatings.size
+                        val updated = currentCampsite.copy(
+                            ratings = updatedRatings,
+                            averageRating = newAverage
+                        )
+
+                        currentCampsite = updated
+                        onCampsiteUpdated(updated)
+                        rating = ""
+                        review = ""
+                        showRateFields = false
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = CampGreenLight,
