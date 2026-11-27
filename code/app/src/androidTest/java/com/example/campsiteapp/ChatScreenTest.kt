@@ -28,6 +28,7 @@ class ChatScreenTest {
                 messages = messages,
                 currentUid = "entrant",
                 reservationId = "reservation1",
+                isNonParticipantAdmin = false,
                 onBack = {},
                 onSend = { sentMessage = it }
             )
