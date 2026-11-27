@@ -33,6 +33,15 @@ import com.example.campsiteapp.ui.theme.CampLabelGrey
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Screen listing the lotteries the current owner created
+ *
+ * Each card shows the campsites, the registration and stay dates, the number of
+ * winners and the waitlist size. Tapping a card opens [EditLotteryScreen], and
+ * Delete removes the lottery
+ *
+ * issue: Delete has no confirmation dialog.
+ */
 @Composable
 fun LotteryListScreen(
     profile: Profile,
