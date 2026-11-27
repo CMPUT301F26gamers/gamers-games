@@ -17,6 +17,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,13 +33,24 @@ import com.example.campsiteapp.ui.theme.CampBackground
 import com.example.campsiteapp.ui.theme.CampGreen
 import com.example.campsiteapp.ui.theme.CampsiteAppTheme
 
+// call with the following
+//RatingsScreen(
+//campsite = selectedCampsite,
+//profile = currentProfile,
+//onBack = { navController.popBackStack() },
+//onCampsiteUpdated = { updatedCampsite ->
+//    repository.updateCampsite(selectedCampsite, updatedCampsite)
+//}
+//)
 @Composable
 fun RatingsScreen(
     campsite: Campsite,
     profile: Profile,
     onBack: () -> Unit,
+    onCampsiteUpdated: (Campsite) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    var currentCampsite by remember(campsite) { mutableStateOf(campsite) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -66,7 +81,10 @@ fun RatingsScreen(
             )
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            itemsIndexed(campsite.ratings) { index, rating ->
+            itemsIndexed(
+                items = currentCampsite.ratings,
+                key = { _, rating -> rating.userID }
+            ) { _, rating ->
                 RatingRow(
                     rating = rating
                 )
@@ -76,7 +94,20 @@ fun RatingsScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
                     ) {
                         Button(
-                            onClick = { campsite.removeRating(rating) },
+                            onClick = {
+                                val updatedRatings = currentCampsite.ratings.filterNot { it == rating }
+                                val newAverage = if (updatedRatings.isEmpty()) {
+                                    0.0
+                                } else {
+                                    updatedRatings.sumOf { it.rating }.toDouble() / updatedRatings.size
+                                }
+                                val updated = currentCampsite.copy(
+                                    ratings = updatedRatings,
+                                    averageRating = newAverage
+                                )
+                                currentCampsite = updated
+                                onCampsiteUpdated(updated)
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Red,
                                 contentColor = Color.White
@@ -86,9 +117,19 @@ fun RatingsScreen(
                         ) {
                             Text("Remove Rating")
                         }
-                        if (rating.review != "") {
+
+                        if (rating.review.isNotEmpty()) {
                             Button(
-                                onClick = { campsite.removeReview(rating) },
+                                onClick = {
+                                    val updatedRatings = currentCampsite.ratings.map { item ->
+                                        if (item == rating) item.copy(review = "") else item
+                                    }
+                                    val updated = currentCampsite.copy(
+                                        ratings = updatedRatings
+                                    )
+                                    currentCampsite = updated
+                                    onCampsiteUpdated(updated)
+                                },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Color.Red,
                                     contentColor = Color.White
