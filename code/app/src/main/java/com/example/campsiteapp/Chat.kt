@@ -7,7 +7,6 @@ class Chat(
     val participantUids: List<String> = emptyList()
 )
 
-/** One entry in a chat's message log. */
 class ChatMessage(
     val id: String = "",
     val senderUid: String = "",

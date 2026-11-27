@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.campsiteapp.ui.theme.CampBackground
@@ -80,7 +81,7 @@ fun ChatScreen(
 }
 
 @Composable
-private fun ChatConversation(
+internal fun ChatConversation(
     messages: List<ChatMessage>,
     currentUid: String,
     reservationId: String,
@@ -114,7 +115,8 @@ private fun ChatConversation(
         ) {
             if (messages.isEmpty()) {
                 item {
-                    Text("No messages yet.", color = Color.LightGray)
+                    Text("No messages yet.", color = Color.LightGray,
+                        modifier = Modifier.testTag("emptyChat"))
                 }
             }
 
@@ -128,6 +130,7 @@ private fun ChatConversation(
                         text = message.text,
                         color = if (isMine) Color.White else Color.Black,
                         modifier = Modifier
+                            .testTag("chatMessage_${message.id}")
                             .widthIn(max = 300.dp)
                             .background(
                                 if (isMine) Color(0xFF1976D2) else CampFieldGrey,
@@ -152,7 +155,7 @@ private fun ChatConversation(
                 placeholder = { Text("Message") },
                 colors = fieldColors(),
                 singleLine = true,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).testTag("messageField")
             )
 
             Spacer(Modifier.width(8.dp))
@@ -163,6 +166,7 @@ private fun ChatConversation(
                     draft = ""
                 },
                 enabled = draft.isNotBlank(),
+                modifier = Modifier.testTag("sendMessageButton"),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = CampGreen,
                     contentColor = Color.White
