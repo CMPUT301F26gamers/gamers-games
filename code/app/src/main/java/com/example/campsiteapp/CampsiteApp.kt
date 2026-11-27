@@ -16,6 +16,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
     val profilesRepository = remember { ProfileRepository() }
     val campsiteRepo = remember { CampsiteRepository() }
     val lotteryRepo = remember { LotteryRepository() }
+    val reservationRepo = remember { ReservationRepository() }
 
     NavHost(navController, startDestination = "welcome") {
         composable("welcome") { WelcomeScreen(navController) }
@@ -30,6 +31,44 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 }
             )
         }
+        composable("pendingReservations") {
+            val profile = AppUser.profile
+            if (profile != null) {
+                PendingReservationsScreen(
+                    userId = profile.uid,
+                    lotteryRepo = lotteryRepo,
+                    campsiteRepo = campsiteRepo,
+                    onPick = { lotteryId, campsiteId -> navController.navigate("reserve/$lotteryId/$campsiteId") },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
+        composable("browseImages") {
+            BrowseImagesScreen(
+                modifier = modifier,
+                navController = navController,
+                profiles = profilesRepository.profiles,
+                onDeleteImage = { profile, _ ->
+                    profilesRepository.removeProfilePicture(profile) { }
+                }
+            )
+        }
+        composable("reserve/{lotteryId}/{campsiteId}") { entry ->
+            val profile = AppUser.profile
+            val lottery = lotteryRepo.findLottery(entry.arguments?.getString("lotteryId") ?: "")
+            val campsite = campsiteRepo.get(entry.arguments?.getString("campsiteId"))
+            if (profile != null && lottery != null && campsite != null) {
+                ReservationScreen(
+                    lottery = lottery,
+                    campsite = campsite,
+                    userId = profile.uid,
+                    reservationRepo = reservationRepo,
+                    lotteryRepo = lotteryRepo,
+                    onFinished = { navController.popBackStack() },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        }
         composable("profile") {
             val profile = AppUser.profile
             if (profile != null) {
@@ -37,6 +76,10 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     name = profile.name,
                     email = profile.email,
                     phone = profile.phoneNumber,
+                    enableNotifications = profile.enableNotifications,
+                    onToggleNotifications = { isChecked ->
+                        profilesRepository.saveNotificationPreference(profile, isChecked)
+                    },
                     // This photo implementation was provided via Codex (2026-11-05):
                     // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
                     profilePicture = profile.profilePicture,

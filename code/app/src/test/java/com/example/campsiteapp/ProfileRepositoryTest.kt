@@ -70,6 +70,75 @@ class ProfileRepositoryTest {
     }
 
     @Test
+    fun removeProfilePictureClearsThePictureAfterFirestoreConfirms() {
+        val profile = Profile("u1", profilePicture = mockk<Blob>())
+        val write = mockk<Task<Void>>(relaxed = true)
+        val success = slot<OnSuccessListener<Void>>()
+        every { ref.document("u1").update("profilePicture", null) } returns write
+        every { write.addOnSuccessListener(capture(success)) } returns write
+        var removed: Boolean? = null
+
+        repo.removeProfilePicture(profile) { removed = it }
+
+        assertNotNull(profile.profilePicture)
+        assertNull(removed)
+        success.captured.onSuccess(null)
+
+        assertNull(profile.profilePicture)
+        assertEquals(true, removed)
+    }
+
+    @Test
+    fun failedPictureRemovalKeepsThePicture() {
+        val picture = mockk<Blob>()
+        val profile = Profile("u1", profilePicture = picture)
+        val write = mockk<Task<Void>>(relaxed = true)
+        val failure = slot<OnFailureListener>()
+        every { ref.document("u1").update("profilePicture", null) } returns write
+        every { write.addOnSuccessListener(any()) } returns write
+        every { write.addOnFailureListener(capture(failure)) } returns write
+        var removed: Boolean? = null
+
+        repo.removeProfilePicture(profile) { removed = it }
+        failure.captured.onFailure(IllegalStateException("Write failed"))
+
+        assertSame(picture, profile.profilePicture)
+        assertEquals(false, removed)
+    }
+
+    @Test
+    fun removingCurrentUsersPictureClearsItForTheCurrentUser() {
+        val current = Profile("u1", profilePicture = mockk<Blob>())
+        AppUser.profile = current
+        val listed = Profile("u1", profilePicture = mockk<Blob>())
+        val write = mockk<Task<Void>>(relaxed = true)
+        val success = slot<OnSuccessListener<Void>>()
+        every { ref.document("u1").update("profilePicture", null) } returns write
+        every { write.addOnSuccessListener(capture(success)) } returns write
+
+        repo.removeProfilePicture(listed) { }
+        success.captured.onSuccess(null)
+
+        assertNull(AppUser.profile?.profilePicture)
+    }
+
+    @Test
+    fun removingAnotherUsersPictureKeepsTheCurrentUsersPicture() {
+        val picture = mockk<Blob>()
+        AppUser.profile = Profile("u2", profilePicture = picture)
+        val other = Profile("u1", profilePicture = mockk<Blob>())
+        val write = mockk<Task<Void>>(relaxed = true)
+        val success = slot<OnSuccessListener<Void>>()
+        every { ref.document("u1").update("profilePicture", null) } returns write
+        every { write.addOnSuccessListener(capture(success)) } returns write
+
+        repo.removeProfilePicture(other) { }
+        success.captured.onSuccess(null)
+
+        assertSame(picture, AppUser.profile?.profilePicture)
+    }
+
+    @Test
     fun deleteProfileRemovesItFromFirestore() {
         repo.deleteProfile(Profile("u1"))
         verify { ref.document("u1").delete() }

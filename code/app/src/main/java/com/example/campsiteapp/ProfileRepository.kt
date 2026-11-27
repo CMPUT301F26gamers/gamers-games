@@ -65,6 +65,18 @@ class ProfileRepository(
             .addOnFailureListener { onComplete(false) }
     }
 
+    fun removeProfilePicture(profile: Profile, onComplete: (Boolean) -> Unit) {
+        profilesRef.document(profile.uid).update("profilePicture", null)
+            .addOnSuccessListener {
+                profile.profilePicture = null
+                if (AppUser.profile?.uid == profile.uid) {
+                    AppUser.profile?.profilePicture = null
+                }
+                onComplete(true)
+            }
+            .addOnFailureListener { onComplete(false) }
+    }
+
     /**
      * Removes a profile from Firestore
      *
@@ -125,6 +137,17 @@ class ProfileRepository(
                 onSuccessfulLoad(newProfile)
             }
         }
+    }
+
+    /**
+     * Saves the user's notification preference to Firestore.
+     *
+     * @param profile The profile whose preference is being updated.
+     * @param enableNotifications The new preference state (true to receive, false to opt out).
+     */
+    fun saveNotificationPreference(profile: Profile, enableNotifications: Boolean) {
+        profile.enableNotifications = enableNotifications
+        profilesRef.document(profile.uid).update("enableNotifications", enableNotifications)
     }
 
     init {

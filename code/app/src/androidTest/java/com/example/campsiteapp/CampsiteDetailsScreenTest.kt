@@ -49,6 +49,15 @@ class CampsiteDetailsScreenTest {
     fun rateButton_exists() {
         show(emptyList())
         composeTestRule.onNodeWithTag("rateButton").assertExists()
+        composeTestRule
+            .onNodeWithTag("rateButton")
+            .performClick()
+        composeTestRule
+            .onNodeWithTag("rating")
+            .assertExists()
+        composeTestRule
+            .onNodeWithTag("review")
+            .assertExists()
     }
 
     @Test
