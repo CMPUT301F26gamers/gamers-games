@@ -44,6 +44,20 @@ fun DashboardScreen(
         // Common features
         DashboardButton("Campsites", navController, "campsites")
         DashboardButton("My Profile", navController, "profile")
+        Button(
+            onClick = {
+                navController.navigate("scanner")
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.LightGray,
+                contentColor = Color.Black
+            )
+        ) {
+            Text("Scan Campsite QR")
+        }
 
         // Entrant features
         if (profile?.hasRole(Roles.ENTRANT) == true) {
