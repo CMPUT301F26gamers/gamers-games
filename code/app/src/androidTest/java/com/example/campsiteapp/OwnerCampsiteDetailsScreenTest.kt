@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performTextInput
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import androidx.compose.ui.test.performScrollTo
 
 
 class OwnerCampsiteDetailsScreenTest {
@@ -38,14 +39,17 @@ class OwnerCampsiteDetailsScreenTest {
     fun test_owner_details_buttons() {
         composeTestRule
             .onNodeWithTag("editButton")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
             .onNodeWithTag("editButton")
+            .performScrollTo()
             .performClick()
 
         composeTestRule
             .onNodeWithTag("newName")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -54,6 +58,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("newLocation")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -62,6 +67,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("newOccupancy")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -70,6 +76,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("newDescription")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -78,10 +85,12 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("confirmButton")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
             .onNodeWithTag("confirmButton")
+            .performScrollTo()
             .performClick()
 
         composeTestRule.waitForIdle()
@@ -92,6 +101,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteName")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -100,6 +110,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteLocation")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -108,6 +119,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteOccupancy")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -116,6 +128,7 @@ class OwnerCampsiteDetailsScreenTest {
 
         composeTestRule
             .onNodeWithTag("campsiteDescription")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule

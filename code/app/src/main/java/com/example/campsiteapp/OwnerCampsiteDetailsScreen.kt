@@ -37,6 +37,8 @@ import com.example.campsiteapp.ui.theme.CampGreenLight
 import com.example.campsiteapp.ui.theme.CampsiteAppTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 
@@ -59,6 +61,7 @@ fun OwnerCampsiteDetailsScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CampBackground)
+            .verticalScroll(rememberScrollState())
     ) {
         Box(
             modifier = Modifier
