@@ -57,4 +57,5 @@ dependencies {
     testImplementation("io.mockk:mockk:1.14.7")
     androidTestImplementation("io.mockk:mockk-android:1.14.7")
     implementation("androidx.navigation:navigation-compose:2.10.2")
+    implementation("com.google.zxing:core:3.5.4")
 }
