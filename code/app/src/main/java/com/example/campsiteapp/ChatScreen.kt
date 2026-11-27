@@ -54,7 +54,7 @@ fun ChatScreen(
 ) {
     if (currentUid !in chat.participantUids) {
         Column(modifier.fillMaxSize().background(CampBackground)) {
-            ScreenHeader("Chat", onBack)
+            ScreenHeader(chat.reservationId, onBack)
             Text(
                 "This chat is only available to its participants.",
                 color = Color.White,
@@ -94,7 +94,7 @@ private fun ChatConversation(
             .background(CampBackground)
             .imePadding()
     ) {
-        ScreenHeader("Chat", onBack)
+        ScreenHeader(reservationId, onBack)
         val listState = rememberLazyListState()
         var draft by rememberSaveable(reservationId) { mutableStateOf("") }
 
