@@ -1,5 +1,7 @@
 package com.example.campsiteapp
 
+import androidx.compose.runtime.mutableStateListOf
+import androidx.room.util.copy
 import java.util.Date
 import kotlin.math.roundToInt
 /**
@@ -31,8 +33,11 @@ data class Campsite(
     var description: String = "",
     var averageRating: Double = 0.0,
     var tags: List<String> = listOf(),
-    var ratings: MutableList<Rating> = mutableListOf()
+    var ratings: List<Rating> = emptyList()
+//    val ratings: MutableList<Rating> = mutableListOf()
 ) {
+//    val ratings = mutableStateListOf<Rating>()
+
     /**
      * Adds a rating to the list of user ratings when called.
      *
@@ -41,10 +46,31 @@ data class Campsite(
      * @param review The review left by the user
      */
     fun addRating(userId: String, rating: Int, review: String = "") {
-        ratings.removeAll { it.userID == userId }
-        val newRating = Rating(userID = userId, rating = rating, review = review)
-        ratings.add(newRating)
+        val updated = ratings.filterNot { it.userID == userId }.toMutableList()
+        updated.add(Rating(userID = userId, rating = rating, review = review))
+        ratings = updated
         computeAverageRating()
+    }
+
+    /**
+     * Removes a rating from the ratings List
+     *
+     * @param rating the rating being removed
+     */
+    fun removeRating(rating: Rating) {
+        ratings = ratings.filterNot { it == rating }
+        computeAverageRating()
+    }
+
+    /**
+     * Removes a review from a rating
+     *
+     * @param rating the rating getting its review removed
+     */
+    fun removeReview(rating: Rating) {
+        ratings = ratings.map { item ->
+            if (item == rating) item.copy(review = "") else item
+        }
     }
 
     /**
