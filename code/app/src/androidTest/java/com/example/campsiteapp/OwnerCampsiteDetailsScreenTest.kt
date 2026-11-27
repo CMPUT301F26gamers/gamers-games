@@ -1,8 +1,10 @@
 package com.example.campsiteapp
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import org.junit.Before
@@ -119,5 +121,17 @@ class OwnerCampsiteDetailsScreenTest {
         composeTestRule
             .onNodeWithTag("campsiteDescription")
             .assertTextEquals("Yapping yapping...")
+    }
+
+    @Test
+    fun qrCode_isDisplayedForCampsite() {
+        composeTestRule
+            .onNodeWithText("Campsite QR Code")
+            .assertExists()
+
+        composeTestRule
+            .onNodeWithTag("campsiteQrCodeImage")
+            .assertExists()
+            .assertIsDisplayed()
     }
 }
