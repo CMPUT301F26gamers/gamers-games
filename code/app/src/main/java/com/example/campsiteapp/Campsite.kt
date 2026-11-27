@@ -31,16 +31,19 @@ data class Campsite(
     var description: String = "",
     var averageRating: Double = 0.0,
     var tags: List<String> = listOf(),
-    var ratings: MutableMap<String, Int> = mutableMapOf()
+    var ratings: MutableList<Rating> = mutableListOf()
 ) {
     /**
      * Adds a rating to the list of user ratings when called.
      *
      * @param userId The ID of the user who left the rating
      * @param rating The rating left by the user
+     * @param review The review left by the user
      */
-    fun addRating(userId: String, rating: Int) {
-        ratings[userId] = rating
+    fun addRating(userId: String, rating: Int, review: String = "") {
+        ratings.removeAll { it.userID == userId }
+        val newRating = Rating(userID = userId, rating = rating, review = review)
+        ratings.add(newRating)
         computeAverageRating()
     }
 
@@ -48,8 +51,17 @@ data class Campsite(
      * Computes the average rating from all the ratings left by users
      */
     fun computeAverageRating() {
-        averageRating =
-            if (ratings.isEmpty()) 0.0
-            else ratings.values.average()
+        if (ratings.isEmpty()) {
+            averageRating = 0.0
+        } else {
+            var currSum: Double = 0.0
+            for (rating in ratings) {
+                currSum += rating.rating
+            }
+            averageRating = currSum/ratings.size
+        }
+//        averageRating =
+//            if (ratings.isEmpty()) 0.0
+//            else ratings.values.average()
     }
 }
