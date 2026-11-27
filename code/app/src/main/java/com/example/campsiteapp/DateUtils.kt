@@ -42,3 +42,28 @@ fun endOfPickedDay(picked: Date): Date {
     }
     return Date(nextMidnight.timeInMillis - 1)
 }
+
+const val DAY_MS = 86_400_000L
+
+/** The date picker returns UTC midnight, so this is exact */
+fun pickerMillisToDay(ms: Long): Int = Math.floorDiv(ms, DAY_MS).toInt()
+fun dayToPickerMillis(day: Int): Long = day * DAY_MS
+
+/** The local calendar day of a Date, as a day number */
+fun Date.toDay(): Int {
+    val local = Calendar.getInstance().apply { time = this@toDay }
+    val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
+        clear()
+        set(local.get(Calendar.YEAR), local.get(Calendar.MONTH), local.get(Calendar.DAY_OF_MONTH))
+    }
+    return pickerMillisToDay(utc.timeInMillis)
+}
+
+/** Local midnight of a day number, for showing the date to the user */
+fun Int.toDate(): Date {
+    val utc = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply { timeInMillis = dayToPickerMillis(this@toDate) }
+    return Calendar.getInstance().apply {
+        clear()
+        set(utc.get(Calendar.YEAR), utc.get(Calendar.MONTH), utc.get(Calendar.DAY_OF_MONTH))
+    }.time
+}

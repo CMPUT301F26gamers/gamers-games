@@ -252,6 +252,21 @@ class LotteryRepository (
             .addOnSuccessListener { onDone(true) }
             .addOnFailureListener { onDone(false) }
     }
+
+    /** Lotteries the user was drawn in and hasn't booked or declined, while booking hasn't ended */
+    fun pendingLotteries(userId: String, now: Date = Date()): List<Lottery> =
+        lotteries.filter { userId in it.winners && !now.after(it.bookingEnd) }
+
+    fun decline(lotteryId: String, userId: String, now: Date, onDone: (Boolean) -> Unit = {}) {
+        val lottery = findLottery(lotteryId)
+        if (lottery == null || !lottery.decline(userId, now)) { onDone(false); return }
+        if (now.after(lottery.registrationEnd)) {
+            lottery.drawWinners(1, System.nanoTime(), now)   // empty if nobody is left
+        }
+        ref.document(lotteryId).update("winners", lottery.winners, "declined", lottery.declined)
+            .addOnSuccessListener { onDone(true) }
+            .addOnFailureListener { onDone(false) }
+    }
 }
 
 /**
