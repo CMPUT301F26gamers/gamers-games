@@ -81,7 +81,7 @@ fun CampsiteDetailsScreen(
                     shape = RoundedCornerShape(16.dp)
                 )
                 .statusBarsPadding()
-                .height(300.dp)
+                .height(330.dp)
                 .padding(horizontal = 16.dp)
         ) {
             Column(
@@ -123,6 +123,17 @@ fun CampsiteDetailsScreen(
                         fontSize = 30.sp,
                         modifier = Modifier.testTag("tagsText")
                     )
+                }
+                Button(
+                    onClick = { showRateFields = !showRateFields }, // TODO: make this switch to the ratings screen
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CampGreen,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier
+                        .testTag("ratingsButton")
+                ) {
+                    Text(text = "Ratings")
                 }
             }
         }

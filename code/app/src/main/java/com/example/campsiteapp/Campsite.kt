@@ -1,5 +1,6 @@
 package com.example.campsiteapp
 
+import androidx.compose.runtime.mutableStateListOf
 import java.util.Date
 import kotlin.math.roundToInt
 /**
@@ -30,9 +31,11 @@ data class Campsite(
     var occupancy: Int = 0,
     var description: String = "",
     var averageRating: Double = 0.0,
-    var tags: List<String> = listOf(),
-    var ratings: MutableList<Rating> = mutableListOf()
+    var tags: List<String> = listOf()
+//    val ratings: MutableList<Rating> = mutableListOf()
 ) {
+    val ratings = mutableStateListOf<Rating>()
+
     /**
      * Adds a rating to the list of user ratings when called.
      *
@@ -45,6 +48,27 @@ data class Campsite(
         val newRating = Rating(userID = userId, rating = rating, review = review)
         ratings.add(newRating)
         computeAverageRating()
+    }
+
+    /**
+     * Removes a rating from the ratings List
+     *
+     * @param rating the rating being removed
+     */
+    fun removeRating(rating:Rating) {
+        ratings.remove(rating)
+        computeAverageRating()
+    }
+
+    /**
+     * Removes a review from a rating
+     *
+     * @param rating the rating getting its review removed
+     */
+    fun removeReview(rating:Rating) {
+        ratings.remove(rating)
+        rating.review = ""
+        ratings.add(rating)
     }
 
     /**

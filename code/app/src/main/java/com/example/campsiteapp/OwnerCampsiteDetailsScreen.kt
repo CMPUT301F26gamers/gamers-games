@@ -208,8 +208,8 @@ fun OwnerCampsiteDetailsScreen(
                                     occupancy = newOccupancy.toInt(),
                                     description = newDescription,
                                     averageRating = campsite.averageRating,
-                                    tags = campsite.tags,
-                                    ratings = campsite.ratings
+                                    tags = campsite.tags
+//                                    ratings = campsite.ratings
                                 )
                             )
                             campsite.name = newCampsiteName
