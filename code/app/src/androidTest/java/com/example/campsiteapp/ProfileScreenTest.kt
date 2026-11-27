@@ -1,9 +1,14 @@
 package com.example.campsiteapp
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -28,11 +33,20 @@ class ProfileScreenTest {
 
     @Before
     fun setUp() {
+
         composeTestRule.setContent {
+            var currentNotificationState by androidx.compose.runtime.remember {
+                androidx.compose.runtime.mutableStateOf(true)
+            }
+
             ProfileScreen(
                 name = "Alex P.",
                 email = "alex@example.com",
                 phone = "780-555-0123",
+                enableNotifications = currentNotificationState,
+                onToggleNotifications = { isChecked ->
+                    currentNotificationState = isChecked
+                },
                 onSave = { name, email, phone ->
                     saveCalled = true
                     savedName = name
@@ -83,6 +97,7 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertTrue(saveCalled)
@@ -107,12 +122,14 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertFalse(saveCalled)
 
         composeTestRule
             .onNodeWithText("Enter a valid email")
+            .performScrollTo()
             .assertExists()
 
         composeTestRule
@@ -132,12 +149,14 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertFalse(saveCalled)
 
         composeTestRule
             .onNodeWithText("Enter a valid phone number")
+            .performScrollTo()
             .assertExists()
     }
 
@@ -149,12 +168,14 @@ class ProfileScreenTest {
 
         composeTestRule
             .onNodeWithTag("saveButton")
+            .performScrollTo()
             .performClick()
 
         assertFalse(saveCalled)
 
         composeTestRule
             .onNodeWithText("Name can't be empty")
+            .performScrollTo()
             .assertExists()
     }
 
@@ -233,5 +254,18 @@ class ProfileScreenTest {
 
         composeTestRule.runOnIdle { assertTrue(deleteCalled) }
         assertFalse(saveCalled)
+    }
+
+    @Test
+    fun notificationToggle_togglesStateAndCallsCallback() {
+
+        composeTestRule.onNodeWithTag("notificationToggle")
+            .assertIsOn()
+
+        composeTestRule.onNodeWithTag("notificationToggle")
+            .performClick()
+
+        composeTestRule.onNodeWithTag("notificationToggle")
+            .assertIsOff()
     }
 }

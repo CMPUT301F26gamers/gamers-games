@@ -76,6 +76,10 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     name = profile.name,
                     email = profile.email,
                     phone = profile.phoneNumber,
+                    enableNotifications = profile.enableNotifications,
+                    onToggleNotifications = { isChecked ->
+                        profilesRepository.saveNotificationPreference(profile, isChecked)
+                    },
                     // This photo implementation was provided via Codex (2026-11-05):
                     // "Provide implementation for profile viewing and saving a profile picture using BitMap, LocalContext, and the Gallery"
                     profilePicture = profile.profilePicture,

@@ -54,12 +54,17 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.material3.Switch
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
 
 @Composable
 fun ProfileScreen(
     name: String,
     email: String,
     phone: String,
+    enableNotifications: Boolean,
+    onToggleNotifications: (Boolean) -> Unit,
     onSave: (String, String, String) -> Unit,
     onBack: () -> Unit,
     onDelete: () -> Unit,
@@ -287,6 +292,29 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Receive Notifications",
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
+                Switch(
+                    checked = enableNotifications,
+                    onCheckedChange = { isChecked ->
+                        onToggleNotifications(isChecked)
+                    },
+                    modifier = Modifier.testTag("notificationToggle")
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
                     nameError = ""
@@ -429,6 +457,8 @@ fun ProfileScreenPreview() {
             name = "Alex P.",
             email = "alex@example.com",
             phone = "780-555-0123",
+            enableNotifications = true,
+            onToggleNotifications = {},
             onSave = { _, _, _ -> },
             onBack = {},
             onDelete = {},
