@@ -56,6 +56,7 @@ fun CampsiteDetailsScreen(
     var showUserFields by remember { mutableStateOf(false) }
     var showRateFields by remember { mutableStateOf(false) }
     var rating by remember { mutableStateOf("") }
+    var review by remember { mutableStateOf("") }
     if (profile.hasRole(Roles.ENTRANT)) {
         showUserFields = true
     }
@@ -214,10 +215,19 @@ fun CampsiteDetailsScreen(
                         .weight(1f)
                         .testTag("rating")
                 )
+                TextField(
+                    value = review,
+                    onValueChange = { review = it },
+                    label = { Text("Review (Optional)") },
+                    colors = fieldColors(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag("review")
+                )
                 Button(
                     onClick = {
                         if (rating.isNotBlank()) {
-                            campsite.addRating(profile.uid, rating = rating.toInt())
+                            campsite.addRating(profile.uid, rating = rating.toInt(), review = review)
                             showRateFields = !showRateFields
                         }
                     },
