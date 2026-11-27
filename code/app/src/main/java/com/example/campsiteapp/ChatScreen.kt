@@ -63,16 +63,10 @@ fun ChatScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (currentUid !in chat.participantUids) {
-        Column(modifier.fillMaxSize().background(CampBackground)) {
-            ScreenHeader(chat.reservationId, onBack)
-            Text(
-                "This chat is only available to its participants.",
-                color = Color.White,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-        return
+    var isNonParticipantAdmin = false
+
+    if (AppUser.profile!!.uid !in chat.participantUids && AppUser.profile!!.hasRole(Roles.ADMIN) ){
+        isNonParticipantAdmin = true
     }
 
     val repository = remember(chat.reservationId) { ChatRepository(chat) }
@@ -84,6 +78,7 @@ fun ChatScreen(
         messages = repository.messages,
         currentUid = currentUid,
         reservationId = chat.reservationId,
+        isNonParticipantAdmin = isNonParticipantAdmin,
         onBack = onBack,
         onSend = { repository.appendMessage(currentUid, it) },
         modifier = modifier
@@ -107,6 +102,7 @@ internal fun ChatConversation(
     messages: List<ChatMessage>,
     currentUid: String,
     reservationId: String,
+    isNonParticipantAdmin: Boolean,
     onBack: () -> Unit,
     onSend: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -164,37 +160,40 @@ internal fun ChatConversation(
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .navigationBarsPadding()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = draft,
-                onValueChange = { draft = it },
-                placeholder = { Text("Message") },
-                colors = fieldColors(),
-                singleLine = true,
-                modifier = Modifier.weight(1f).testTag("messageField")
-            )
+        if (!isNonParticipantAdmin) {
 
-            Spacer(Modifier.width(8.dp))
-
-            Button(
-                onClick = {
-                    onSend(draft)
-                    draft = ""
-                },
-                enabled = draft.isNotBlank(),
-                modifier = Modifier.testTag("sendMessageButton"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CampGreen,
-                    contentColor = Color.White
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Send")
+                TextField(
+                    value = draft,
+                    onValueChange = { draft = it },
+                    placeholder = { Text("Message") },
+                    colors = fieldColors(),
+                    singleLine = true,
+                    modifier = Modifier.weight(1f).testTag("messageField")
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Button(
+                    onClick = {
+                        onSend(draft)
+                        draft = ""
+                    },
+                    enabled = draft.isNotBlank(),
+                    modifier = Modifier.testTag("sendMessageButton"),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = CampGreen,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Send")
+                }
             }
         }
     }
@@ -211,6 +210,7 @@ private fun ChatScreenPreview() {
             ),
             currentUid = "entrant",
             reservationId = "preview-reservation",
+            isNonParticipantAdmin = false,
             onBack = {},
             onSend = {}
         )
