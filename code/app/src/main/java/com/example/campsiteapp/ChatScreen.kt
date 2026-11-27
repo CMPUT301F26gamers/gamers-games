@@ -46,6 +46,16 @@ import com.example.campsiteapp.ui.theme.CampsiteAppTheme
 // the messages like right is yourself in blue and left is in grey from other
 // with sending message option at the bottom. Follow other screens as much as you can
 
+
+/**
+ * Screen representing one instance of a chat.
+ *
+ * This screen shows one conversation for a reservation between the owner and entrant.
+ * It will use the provided chat and currentUserID to determine if the user should see that chat.
+ *
+ * @param chat Instance of the chat that needs to be shown
+ * @param currentUid The ID of the user attempting to see the chat
+ */
 @Composable
 fun ChatScreen(
     chat: Chat,
@@ -80,6 +90,18 @@ fun ChatScreen(
     )
 }
 
+/**
+ * Screen that is used to represent show the conversation
+ *
+ * This is used by ChatScreen as a helper to show the conversation.
+ * The header will the chat/reservation ID.
+ * The screen will show white background for other users text and blue background for current users texts.
+ * There is a text input on the bottom alongside a send button
+ *
+ * @param messages List of messages
+ * @param currentUid Current users ID
+ * @param reservationId Chats/Reservations ID
+ */
 @Composable
 internal fun ChatConversation(
     messages: List<ChatMessage>,
