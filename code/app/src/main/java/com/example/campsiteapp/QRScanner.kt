@@ -43,9 +43,13 @@ import java.util.concurrent.Executors
 /* This function was made by Andrés Cruz at
 https://www.desarrollolibre.net/blog/android/how-to-create-a-qr-code-reader-on-android-with-android-studio 2026 */
 @Composable
-fun ScannerScreen(navController: NavController) {
+fun ScannerScreen(navController: NavController,
+                  campsiteRepo: CampsiteRepo
+) {
     val context = LocalContext.current
     var hasCameraPermission by remember { mutableStateOf(false) }
+    var hasScanned by remember { mutableStateOf(false) }
+    var scanError by remember { mutableStateOf<String?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
@@ -70,14 +74,30 @@ fun ScannerScreen(navController: NavController) {
         if (hasCameraPermission) {
             CameraPreview(
                 modifier = Modifier.weight(1f),
+                hasScanned = hasScanned,
                 onQrCodeDetected = { scannedId ->
-                    // Once a QR code is detected, navigate to the details screen!
-                    navController.navigate("campsiteDetails/$scannedId") {
-                        // Remove the scanner from the backstack so pressing "Back" from details goes to Dashboard
-                        popUpTo("scanner") { inclusive = true }
+                    // Check if the scanned ID exists in the repository
+                    if (campsiteRepo.campsites.any { it.id == scannedId }) {
+                        hasScanned = true
+                        navController.navigate("campsiteDetails/$scannedId") {
+                            popUpTo("scanner") { inclusive = true }
+                        }
+                    } else {
+                        scanError = "Not a campsite QR"
                     }
                 }
             )
+
+            if (scanError != null) {
+                Text(
+                    text = scanError!!,
+                    color = Color.Red,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+
             Text(
                 text = "Point your camera at a Campsite QR Code",
                 color = Color.White,
@@ -98,13 +118,11 @@ fun ScannerScreen(navController: NavController) {
 @Composable
 fun CameraPreview(
     modifier: Modifier = Modifier,
+    hasScanned: Boolean,
     onQrCodeDetected: (String) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-
-    // Use a state so we only process the first valid QR code scan
-    var hasScanned by remember { mutableStateOf(false) }
 
     AndroidView(
         modifier = modifier.fillMaxWidth(),
@@ -115,7 +133,7 @@ fun CameraPreview(
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build().also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
+                    it.surfaceProvider = previewView.surfaceProvider
                 }
 
                 val imageAnalyzer = ImageAnalysis.Builder()
@@ -124,7 +142,6 @@ fun CameraPreview(
                     .also {
                         it.setAnalyzer(cameraExecutor, BarcodeAnalyzer { result ->
                             if (!hasScanned) {
-                                hasScanned = true
                                 onQrCodeDetected(result)
                             }
                         })
