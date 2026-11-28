@@ -230,6 +230,11 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                 )
             }
         }
+        composable("scanner") {
+            ScannerScreen(
+                navController = navController,
+                campsiteRepo = campsiteRepo)
+        }
         composable("ownerCampsiteDetails/{campsiteID}") { backStackEntry ->
             val campsite = campsiteRepo.get(backStackEntry.arguments?.getString("campsiteID"))
             val profile = AppUser.profile
