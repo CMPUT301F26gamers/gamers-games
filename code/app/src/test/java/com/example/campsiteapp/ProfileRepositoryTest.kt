@@ -34,7 +34,7 @@ class ProfileRepositoryTest {
         val picture = mockk<Blob>()
         val write = mockk<Task<Void>>(relaxed = true)
         val success = slot<OnSuccessListener<Void>>()
-        every { ref.document("u1").update("profilePicture", picture) } returns write
+        every { ref.document("u1").update("profilePicture", picture, *anyVararg()) } returns write
         every { write.addOnSuccessListener(capture(success)) } returns write
         var saved: Boolean? = null
 
@@ -45,6 +45,7 @@ class ProfileRepositoryTest {
         success.captured.onSuccess(null)
 
         assertSame(picture, profile.profilePicture)
+        assertNotNull(profile.profilePictureDate)
         assertEquals(true, saved)
     }
 
@@ -57,7 +58,7 @@ class ProfileRepositoryTest {
         val replacement = mockk<Blob>()
         val write = mockk<Task<Void>>(relaxed = true)
         val failure = slot<OnFailureListener>()
-        every { ref.document("u1").update("profilePicture", replacement) } returns write
+        every { ref.document("u1").update("profilePicture", replacement, *anyVararg()) } returns write
         every { write.addOnSuccessListener(any()) } returns write
         every { write.addOnFailureListener(capture(failure)) } returns write
         var saved: Boolean? = null

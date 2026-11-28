@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.campsiteapp.ui.theme.CampGreen
+import java.text.DateFormat
 
 @Composable
 fun BrowseImagesScreen(
@@ -43,11 +44,15 @@ fun BrowseImagesScreen(
     profiles: List<Profile>,
     onDeleteImage: (Profile, String) -> Unit
 ) {
+    var search by remember { mutableStateOf("") }
     var selectedProfileId by remember { mutableStateOf<String?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    var showView by remember { mutableStateOf(false) }
     var message by remember { mutableStateOf("") }
 
-    val images = profiles.filter { it.profilePicture != null }
+    val images = profiles.filter {
+        it.profilePicture != null && it.name.contains(search, ignoreCase = true)
+    }
     val selectedProfile = images.firstOrNull { it.uid == selectedProfileId }
 
     Box(
@@ -57,6 +62,16 @@ fun BrowseImagesScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             ScreenHeader(title = "All Images", onBack = { navController.popBackStack() })
+
+            TextField(
+                value = search,
+                onValueChange = { search = it },
+                placeholder = { Text("Search by owner name") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+                    .testTag("searchField")
+            )
 
             if (images.isEmpty()) {
                 Text(
@@ -79,22 +94,56 @@ fun BrowseImagesScreen(
             }
         }
 
-        Button(
+        Row(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .testTag("deleteImageButton"),
-            enabled = selectedProfile != null,
-            onClick = {
-                message = ""
-                showDialog = true
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red
-            )
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Delete")
+            Button(
+                modifier = Modifier.testTag("viewImageButton"),
+                enabled = selectedProfile != null,
+                onClick = { showView = true }
+            ) {
+                Text("View")
+            }
+
+            Button(
+                modifier = Modifier.testTag("deleteImageButton"),
+                enabled = selectedProfile != null,
+                onClick = {
+                    message = ""
+                    showDialog = true
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                )
+            ) {
+                Text("Delete")
+            }
         }
+    }
+
+    if (showView && selectedProfile != null) {
+        AlertDialog(
+            onDismissRequest = { showView = false },
+            title = { Text(selectedProfile.name.ifBlank { "Unnamed user" }) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ProfileAvatar(
+                        picture = selectedProfile.profilePicture,
+                        modifier = Modifier.size(200.dp)
+                    )
+                    Text("Type: Profile picture")
+                    Text(uploadedDate(selectedProfile))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showView = false }) {
+                    Text("Close")
+                }
+            }
+        )
     }
 
     if (showDialog && selectedProfile != null) {
@@ -177,8 +226,18 @@ fun ImageRow(
                 text = "Profile picture",
                 color = Color.DarkGray
             )
+
+            Text(
+                text = uploadedDate(profile),
+                color = Color.DarkGray
+            )
         }
     }
+}
+
+fun uploadedDate(profile: Profile): String {
+    val date = profile.profilePictureDate ?: return "Upload date unknown"
+    return "Uploaded " + DateFormat.getDateInstance().format(date)
 }
 
 @Preview(showBackground = true)

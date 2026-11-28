@@ -1,6 +1,7 @@
 package com.example.campsiteapp
 
 import com.google.firebase.firestore.Blob
+import java.util.Date
 
 /**
  * Roles for users
@@ -34,7 +35,7 @@ enum class Roles {
 class Profile (val uid: String = "", var name: String = "", var email: String = "",
                var phoneNumber: String = "", var profilePictureUrl: String = "",
                var enableNotifications: Boolean = true, val roles: MutableList<Roles> = mutableListOf<Roles>(Roles.ENTRANT),
-               var profilePicture: Blob? = null) {
+               var profilePicture: Blob? = null, var profilePictureDate: Date? = null) {
 
     /**
      * Updates the profile information
