@@ -13,6 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.firestore.Blob
 import java.io.ByteArrayOutputStream
+import java.text.DateFormat
+import java.util.Date
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -26,9 +28,10 @@ class BrowseImagesScreenTest {
     val composeTestRule = createComposeRule()
 
     private val picture = createPicture()
+    private val uploaded = Date(1_795_000_000_000)
 
     private val testingProfiles = mutableStateListOf(
-        Profile(uid = "1", name = "Alex P.", profilePicture = picture),
+        Profile(uid = "1", name = "Alex P.", profilePicture = picture, profilePictureDate = uploaded),
         Profile(uid = "2", name = "Jane D.", profilePicture = picture),
         Profile(uid = "3", name = "Sam K.")
     )
@@ -111,5 +114,34 @@ class BrowseImagesScreenTest {
         composeTestRule.runOnIdle { assertNull(deletedProfile) }
         composeTestRule.onNodeWithText("Alex P.").assertExists()
         composeTestRule.onNodeWithTag("confirmDeleteImage").assertDoesNotExist()
+    }
+
+    @Test
+    fun testSearchByOwnerName() {
+        composeTestRule.onNodeWithTag("searchField").performTextInput("jAnE")
+        composeTestRule.onNodeWithText("Jane D.").assertExists()
+        composeTestRule.onNodeWithText("Alex P.").assertDoesNotExist()
+    }
+
+    @Test
+    fun testUploadDateDisplayed() {
+        composeTestRule.onNodeWithText("Uploaded " + DateFormat.getDateInstance().format(uploaded)).assertExists()
+        composeTestRule.onNodeWithText("Upload date unknown").assertExists()
+    }
+
+    @Test
+    fun testViewButtonDisabledUntilImageSelected() {
+        composeTestRule.onNodeWithTag("viewImageButton").assertIsNotEnabled()
+        composeTestRule.onNodeWithTag("imageRow_2").performClick()
+        composeTestRule.onNodeWithTag("viewImageButton").assertIsEnabled()
+    }
+
+    @Test
+    fun testViewShowsImageDetails() {
+        composeTestRule.onNodeWithTag("imageRow_2").performClick()
+        composeTestRule.onNodeWithTag("viewImageButton").performClick()
+        composeTestRule.onNodeWithText("Type: Profile picture").assertExists()
+        composeTestRule.onNodeWithText("Close").performClick()
+        composeTestRule.onNodeWithText("Type: Profile picture").assertDoesNotExist()
     }
 }

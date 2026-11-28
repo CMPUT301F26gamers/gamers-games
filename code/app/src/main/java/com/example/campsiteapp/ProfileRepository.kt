@@ -5,6 +5,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.Blob
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.firestore
+import java.util.Date
 
 /**
  * Loads and manages user profiles in Firestore
@@ -57,9 +58,11 @@ class ProfileRepository(
      * @param onComplete Receives true if the save succeeds, false otherwise
      */
     fun saveProfilePicture(profile: Profile, picture: Blob, onComplete: (Boolean) -> Unit) {
-        profilesRef.document(profile.uid).update("profilePicture", picture)
+        val date = Date()
+        profilesRef.document(profile.uid).update("profilePicture", picture, "profilePictureDate", date)
             .addOnSuccessListener {
                 profile.profilePicture = picture
+                profile.profilePictureDate = date
                 onComplete(true)
             }
             .addOnFailureListener { onComplete(false) }
