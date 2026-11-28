@@ -1,3 +1,48 @@
+Date: 27/11/26 | 6:04PM
+
+Melody - Assigned US 01.06.01, US 02.07.01, US 01.07.01.
+
+Sahib - Assigned US 02.06.01, US 02.10.02, US 02.11.01.
+
+Jagdip - Assigned US 01.06.02, US 02.07.02, US 02.08.01.
+
+Mujtaba - Assigned US 01.05.02, US 01.07.02, US 02.10.01.
+
+Duy - Assigned US 01.05.01.
+
+Tu - Assigned US 02.07.03, US 02.04.08, US 01.07.01.
+
+
+Discussion:
+  Jagdip is updating the CRC cards. UML diagram to be done together on Monday.
+
+
+Group Action Items:
+  Update the project board as stories progress.
+  Review and approve open PRs (2 approvals needed to merge).
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+Date: 20/11/26 | 7:30PM
+
+Melody - Assigned US 01.13.02, US 03.09.01, US 03.10.01.
+
+Sahib - Assigned US 03.03.01, US 03.06.01. Continuing US 02.05.01.
+
+Jagdip - Assigned US 02.12.01, US 01.14.01, US 03.12.01.
+
+Mujtaba - Assigned US 01.03.01, US 01.03.02, US 03.08.01.
+
+Duy - Assigned US 01.04.01, US 01.04.02, US 01.04.03.
+
+Tu - Assigned US 02.02.01, US 01.12.01, US 01.10.01.
+
+Discussion:
+  Split the remaining user stories so everyone takes about 3.
+
+Group Action Items:
+  Everyone works on their assigned stories and opens PRs.
+  Check in around Wednesday.
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 Date: 2/11/26 | 10:00PM
 
