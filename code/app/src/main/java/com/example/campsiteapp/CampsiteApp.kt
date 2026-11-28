@@ -250,7 +250,7 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
         composable("campsiteDetails/{campsiteID}") { backStackEntry ->
             val campsiteID = backStackEntry.arguments?.getString("campsiteID")
             println(campsiteID)
-            val campsite = campsiteRepo.get(campsiteID)
+            var campsite = campsiteRepo.get(campsiteID)
             val profile = AppUser.profile
             if (profile != null && campsite != null) {
                 CampsiteDetailsScreen(
@@ -260,6 +260,9 @@ fun CampSiteApp(modifier: Modifier = Modifier) {
                     joinStateOf = { lotteryRepo.joinState(it, profile.uid, Date()) },
                     onJoin = { lottery, done -> lotteryRepo.enter(lottery, profile.uid, Date(), done) },
                     onLeave = { lottery, done -> lotteryRepo.leave(lottery, profile.uid, done) },
+                    onCampsiteUpdated = { updatedCampsite ->
+                        campsiteRepo.updateCampsite(campsite, updatedCampsite)
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }

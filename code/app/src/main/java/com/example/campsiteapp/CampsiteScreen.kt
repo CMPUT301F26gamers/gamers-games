@@ -199,7 +199,7 @@ fun CampsiteScreen(
                         .padding(16.dp)
                         .testTag("removeFieldButton"),
                     onClick = {
-                        showRemoveCampsiteFields = !showAddCampsiteFields
+                        showRemoveCampsiteFields = !showRemoveCampsiteFields
                         showAddCampsiteFields = false
                         if (showRemoveCampsiteFields) {
                             newCampsiteName = ""
@@ -276,6 +276,7 @@ fun CampsiteScreen(
                     onClick = {
                         if (showRemoveCampsiteFields) {
                             onRemoveCampsite(campsite)
+                            showRemoveCampsiteFields = false
                         } else if (navController != null) {
                             navController.navigate("campsiteDetails/${campsite.id}")
                         }
